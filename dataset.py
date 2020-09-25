@@ -147,8 +147,8 @@ def generate_2d(data, noise, samples, shuffle=False):
     data = []
     targets = []
     for lbl, center in enumerate(centers):
-        X = np.random.normal(loc=center, scale=noise, size=(n_samples, 2))
-        y = np.repeat(lbl, n_samples).tolist()
+        X = np.random.normal(loc=center, scale=noise, size=(samples, 2))
+        y = np.repeat(lbl, samples).tolist()
         data.append(X)
         targets += y
     data = np.concatenate(data)
@@ -159,7 +159,7 @@ def generate_2d(data, noise, samples, shuffle=False):
         idx_arr = np.random.choice(np.arange(len(data)), len(data), replace=False)
         data, targets = data[idx_arr], targets[idx_arr]
 
-    return data, targets
+    return data, targets, len(centers)
 
 def generate_3d(data, noise, samples, shuffle=False):
     if data == 1: # 2 curves on sphere

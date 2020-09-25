@@ -32,7 +32,7 @@ parser.add_argument('--save_dir', type=str, default='./saved_models/',
 args = parser.parse_args()
 
 # pipeline setup
-model_dir = os.path.join(args.save_dir, "vector2d", f"data{args.data}_noise{args.noise}",
+model_dir = os.path.join(args.save_dir, "gaussian2d", f"data{args.data}_noise{args.noise}",
                          "samples{}_layers{}_eps{}_eta{}"
                          "".format(args.samples, args.layers, args.eps, args.eta))
 os.makedirs(model_dir, exist_ok=True)
@@ -73,10 +73,10 @@ plot.plot_heatmap(X_train, y_train, "X_train", num_classes, model_dir)
 plot.plot_heatmap(X_test, y_test, "X_test", num_classes, model_dir)
 plot.plot_heatmap(Z_train, y_train, "Z_train", num_classes, model_dir)
 plot.plot_heatmap(Z_test, y_test, "Z_test", num_classes, model_dir)
-plot.plot_3d(X_train, y_train, "X_train", model_dir)
-plot.plot_3d(X_test, y_test, "X_test", model_dir)
-plot.plot_3d(Z_train, y_train, "Z_train", model_dir)
-plot.plot_3d(Z_test, y_test, "Z_test", model_dir)
+plot.plot_2d(X_train, y_train, "X_train", model_dir)
+plot.plot_2d(X_test, y_test, "X_test", model_dir)
+plot.plot_2d(Z_train, y_train, "Z_train", model_dir)
+plot.plot_2d(Z_test, y_test, "Z_test", model_dir)
 
 # save per layers
 # layers_dir = os.path.join(model_dir, "features", "layers")

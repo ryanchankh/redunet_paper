@@ -140,15 +140,9 @@ def generate_scurve(samples, noise, num_classes):
 
 def generate_2d(data, noise, samples, shuffle=False):
     if data == 1:
-        centers = [(-1, 0), (1, 0)]
-    elif data == 2:
-        centers = [(0, 1), (1, 0)]
-    elif data == 3:
-        centers = [(1, 1), (1, 0), (-1, 0)]
-    elif data == 4:
-        centers = [(-1, 1), (-1, -1), (1, 0)]
-    elif data == 5:
-        centers = [(1, 0), (-1, 0), (0, 1), (0, -1)]
+        centers = [(1, 0), (0, 1)]
+    else:
+        raise NameErorr('data not found.')
 
     data = []
     targets = []

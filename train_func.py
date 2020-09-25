@@ -12,6 +12,31 @@ import dataset
 import utils
 
 
+def get_one_each(X, y):
+    classes = np.unique(y)
+    _X = []
+    for c in classes:
+        idx = y==c
+        X_class = X[idx][0]
+        _X.append(X_class)
+    return np.stack(_X), np.arange(classes.size)   
+
+def translate_all(data, labels):
+    n_samples, _, n_dim = data.shape
+    data_new, labels_new = [], []
+    for i in range(n_samples):
+        for r in range(n_dim):
+            data_new.append(np.roll(data[i], r, axis=1))
+            labels_new.append(labels[i])
+    data = np.stack(data_new)
+    labels = np.array(labels_new)
+    return data, labels
+
+def shuffle(data, labels):
+    num_samples = data.shape[0]
+    idx = np.random.choice(np.arange(num_samples), num_samples, replace=False)
+    return data[idx], labels[idx]
+
 def filter_class(data, labels, class_to_keep):
     data_filter = []
     labels_filter = []

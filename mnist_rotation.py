@@ -34,7 +34,7 @@ parser.add_argument('--data_dir', type=str, default='./data/mnist',
                     help='base directory for saving PyTorch model. (default: ./data/mnist/)')
 args = parser.parse_args()
 
-model_dir = os.path.join("./saved_models", "mnist_rotation_5class",
+model_dir = os.path.join("./saved_models", "mnist_rotation_2class",
                          "time{}_samples{}_kernel{}_channels{}_layers{}_eps{}_eta{}_relu{}"
                          "".format(args.time, args.samples, args.kernel, args.channels,
                                    args.layers, args.eps, args.eta, args.relu))
@@ -43,17 +43,17 @@ os.makedirs(model_dir, exist_ok=True)
 # data loading
 # X_train, y_train = dataset.load_MNIST_polar("./data/mnist/", args.samples, args.channels, args.time, train=True)
 # X_test, y_test = dataset.load_MNIST_polar("./data/mnist/", args.samples, args.channels, args.time, train=False)
-X_train = np.load('./data/mnist_rotation/mnist_X_train_C5_T200.npy')[:args.samples]
-y_train = np.load('./data/mnist_rotation/mnist_y_train_C5_T200.npy')[:args.samples]
+X_train = np.load('./data/mnist_rotation/mnist_X_train_C5_T200.npy')
+y_train = np.load('./data/mnist_rotation/mnist_y_train_C5_T200.npy')
 X_test = np.load('./data/mnist_rotation/mnist_X_test_C5_T200.npy')
 y_test = np.load('./data/mnist_rotation/mnist_y_test_C5_T200.npy')
-num_classes = 5
-X_train, y_train = tf.filter_class(X_train, y_train, num_classes)
+num_classes = 2
+X_train, y_train = tf.filter_class(X_train, y_train, num_classes, args.samples)
 X_train, y_train = tf.shuffle(X_train, y_train)
 X_test, y_test = tf.filter_class(X_test, y_test, num_classes)
 X_each, y_each = tf.get_one_each(X_test, y_test)
-print(X_each.shape)
 X_translate, y_translate = tf.translate_all(X_each, y_each)
+print(X_train.shape, X_test.shape, y_train.shape, y_test.shape)
 
 # setup architecture
 kernels = dataset.generate_kernel('random', args.channels, 5, args.kernel)
@@ -78,6 +78,7 @@ utils.save_features(model_dir, "Z_translate", Z_translate, y_test)
 np.save(os.path.join(model_dir, "features", "kernel.npy"), kernels)
 
 X_train = tf.normalize(X_train.reshape(X_train.shape[0], -1))
+X_test = tf.normalize(X_test.reshape(X_test.shape[0], -1))
 X_translate = tf.normalize(X_translate.reshape(X_translate.shape[0], -1))
 Z_train = tf.normalize(Z_train.reshape(Z_train.shape[0], -1))
 Z_test = tf.normalize(Z_test.reshape(Z_test.shape[0], -1))
@@ -101,6 +102,7 @@ utils.save_params(model_dir, acc, name="acc_translate.json")
 plot.plot_combined_loss(model_dir)
 # plot.plot_combined_loss_translation(model_dir)
 plot.plot_heatmap(X_train, y_train, "X_train", num_classes, model_dir)
+plot.plot_heatmap(X_test, y_test, "X_test", num_classes, model_dir)
 plot.plot_heatmap(X_translate, y_translate, "X_translate", num_classes, model_dir)
 plot.plot_heatmap(Z_train, y_train, "Z_train", num_classes, model_dir)
 plot.plot_heatmap(Z_test, y_test, "Z_test", num_classes, model_dir)

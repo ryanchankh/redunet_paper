@@ -37,13 +37,13 @@ def shuffle(data, labels):
     idx = np.random.choice(np.arange(num_samples), num_samples, replace=False)
     return data[idx], labels[idx]
 
-def filter_class(data, labels, class_to_keep):
+def filter_class(data, labels, num_classes, num_samples=None):
     data_filter = []
     labels_filter = []
-    for _class in np.arange(class_to_keep):
+    for _class in np.arange(num_classes):
         idx = labels == _class
-        data_filter.append(data[idx])
-        labels_filter.append(labels[idx])
+        data_filter.append(data[idx][:num_samples])
+        labels_filter.append(labels[idx][:num_samples])
     return np.vstack(data_filter), np.hstack(labels_filter)
 
 def label_to_membership(targets, num_classes=None):

@@ -152,6 +152,7 @@ def generate_2d(data, noise, samples, shuffle=False):
         data.append(X)
         targets += y
     data = np.concatenate(data)
+    data = normalize(data, axis=1)
     targets = np.array(targets)
 
     if shuffle:

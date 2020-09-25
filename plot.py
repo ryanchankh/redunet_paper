@@ -30,7 +30,7 @@ def plot_heatmap(features, labels, title, num_classes, model_dir):
     
     save_dir = os.path.join(model_dir, "figures", "heatmaps")
     os.makedirs(save_dir, exist_ok=True)
-    plt.savefig(os.path.join(save_dir, f"plot-heatmap-{title}.png"), dpi=200)
+    plt.savefig(os.path.join(save_dir, f"heatmap-{title}.png"), dpi=200)
     plt.close()
 
 

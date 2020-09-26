@@ -32,7 +32,7 @@ parser.add_argument('--save_dir', type=str, default='./saved_models/',
 args = parser.parse_args()
 
 # pipeline setup
-model_dir = os.path.join(args.save_dir, "vector3d", f"data{args.data}_noise{args.noise}",
+model_dir = os.path.join(args.save_dir, "gaussian3d", f"data{args.data}_noise{args.noise}",
                          "samples{}_layers{}_eps{}_eta{}"
                          "".format(args.samples, args.layers, args.eps, args.eta))
 os.makedirs(model_dir, exist_ok=True)

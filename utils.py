@@ -8,24 +8,29 @@ import torch
 from torch.nn.functional import normalize
 
 
-def sort_dataset(data, labels, num_classes=10, stack=False):
+def sort_dataset(data, labels, classes, stack=False):
     """Sort dataset based on classes.
     
     Parameters:
         data (np.ndarray): data array
         labels (np.ndarray): one dimensional array of class labels
-        num_classes (int): number of classes
+        classes (int): number of classes
         stack (bol): combine sorted data into one numpy array
     
     Return:
         sorted data (np.ndarray), sorted_labels (np.ndarray)
 
     """
-    sorted_data = [[] for _ in range(num_classes)]
-    for i, lbl in enumerate(labels):
-        sorted_data[lbl].append(data[i])
-    sorted_data = [np.stack(class_data) for class_data in sorted_data if class_data != []]
-    sorted_labels = [np.repeat(i, (len(sorted_data[i]))) for i in range(num_classes)]
+    if type(classes) == int:
+        classes = np.arange(classes)
+    sorted_data = []
+    sorted_labels = []
+    for c in classes:
+        idx = labels == c
+        data_c = data[idx]
+        labels_c = labels[idx]
+        sorted_data.append(data_c)
+        sorted_labels.append(labels_c)
     if stack:
         sorted_data = np.vstack(sorted_data)
         sorted_labels = np.hstack(sorted_labels)

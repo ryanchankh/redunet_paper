@@ -10,22 +10,25 @@ import train_func as tf
 import utils
 
 
-def plot_heatmap(features, labels, title, num_classes, model_dir):
+def plot_heatmap(features, labels, title, classes, model_dir):
     """Plot heatmap of cosine simliarity for all features. """
     num_samples = features.shape[0]
-    features_sort, _ = utils.sort_dataset(features, labels, 
-                            num_classes=num_classes, stack=False)
-    features_sort_ = np.vstack(features_sort)
+    if type(classes) == int:
+        classes = np.arange(classes)
+    features_sort_, _ = utils.sort_dataset(features, labels, 
+                            classes=classes, stack=True)
+    print(features_sort_.shape)
+    # features_sort_ = np.vstack(features_sort)
     sim_mat = np.abs(features_sort_ @ features_sort_.T)
     print(sim_mat.min(), sim_mat.max())
 
     fig, ax = plt.subplots(figsize=(7, 5), sharey=True, sharex=True, dpi=400)
     im = ax.imshow(sim_mat, cmap='Blues')
     fig.colorbar(im, pad=0.02, drawedges=0, ticks=[0, 0.5, 1])
-    ax.set_xticks(np.linspace(0, num_samples, 6))
-    ax.set_yticks(np.linspace(0, num_samples, 6))
-    [tick.label.set_fontsize(10) for tick in ax.xaxis.get_major_ticks()] 
-    [tick.label.set_fontsize(10) for tick in ax.yaxis.get_major_ticks()]
+    ax.set_xticks(np.linspace(0, num_samples, len(classes)))
+    ax.set_yticks(np.linspace(0, num_samples, len(classes)))
+    [tick.label.set_fontsize(12) for tick in ax.xaxis.get_major_ticks()] 
+    [tick.label.set_fontsize(12) for tick in ax.yaxis.get_major_ticks()]
     fig.tight_layout()
     
     save_dir = os.path.join(model_dir, "figures", "heatmaps")

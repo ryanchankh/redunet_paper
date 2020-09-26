@@ -37,10 +37,12 @@ def shuffle(data, labels):
     idx = np.random.choice(np.arange(num_samples), num_samples, replace=False)
     return data[idx], labels[idx]
 
-def filter_class(data, labels, num_classes, num_samples=None):
+def filter_class(data, labels, classes, num_samples=None):
+    if type(classes) == int:
+        classes = np.arange(classes)
     data_filter = []
     labels_filter = []
-    for _class in np.arange(num_classes):
+    for _class in classes:
         idx = labels == _class
         data_filter.append(data[idx][:num_samples])
         labels_filter.append(labels[idx][:num_samples])

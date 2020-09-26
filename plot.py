@@ -136,7 +136,6 @@ def plot_3d(X, y, name, model_dir):
     fig = plt.figure(figsize=(10, 10))
     ax = fig.add_subplot(111, projection='3d')
     ax.scatter(X[:, 0], X[:, 1], X[:, 2], c=colors[y], cmap=plt.cm.Spectral)
-#    ax.view_init(4, -72)
     plt.tight_layout()
     fig.savefig(os.path.join(savedir, f"scatter3d-{name}.png"))
     plt.close()

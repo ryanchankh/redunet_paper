@@ -47,48 +47,6 @@ def filter_class(data, labels, classes, num_samples=None):
         data_filter.append(data[idx][:num_samples])
         labels_filter.append(labels[idx][:num_samples])
     return np.vstack(data_filter), np.hstack(labels_filter)
-
-def label_to_membership(targets, num_classes=None):
-    """Generate a true membership matrix, and assign value to current Pi.
-
-    Parameters:
-        targets (np.ndarray): matrix with one hot labels
-
-    Return:
-        Pi: membership matirx, shape (num_classes, num_samples, num_samples)
-
-    """
-    targets = one_hot(targets, num_classes)
-    num_samples, num_classes = targets.shape
-    Pi = np.zeros(shape=(num_classes, num_samples, num_samples))
-    for j in range(len(targets)):
-        k = np.argmax(targets[j])
-        Pi[k, j, j] = 1.
-    return torch.tensor(Pi, dtype=torch.float)
-
-def membership_to_label(membership):
-    """Turn a membership matrix into a list of labels."""
-    _, num_classes, num_samples, _ = membership.shape
-    labels = np.zeros(num_samples)
-    for i in range(num_samples):
-        labels[i] = np.argmax(membership[:, i, i])
-    return labels
-
-def one_hot(y, num_classes):
-    """Turn labels x into one hot vector of K classes. """
-    label = torch.zeros(size=(y.shape[0], num_classes))
-    for i in range(len(y)):
-        label[i][y[i]] = 1.
-    return label
-
-def corrupt_labels(mode):
-    if mode == "shuffle":
-        from corrupt import shuffle_corrupt
-        return shuffle_corrupt
-    elif mode == "pairflip":
-        from corrupt import noisify_pairflip
-        return noisify_pairflip
-    raise NameError("{} corruption mode not found.".format(mode))
     
 def normalize(X, p=2):
     axes = tuple(np.arange(1, len(X.shape)).tolist())
@@ -101,6 +59,11 @@ def batch_cov(V, bs):
     return np.sum([np.einsum('ji...,jk...->ik...', V[i:i+bs], V[i:i+bs].conj(), optimize=True) \
                      for i in np.arange(0, m, bs)], axis=0)
 
-def create_group(X, num_classes):
-    return (np.vstack([X for _ in range(num_classes)]),
-            np.repeat(np.arange(num_classes), X.shape[0]))
+def generate_kernel(mode, out_channels, in_channels, kernel_size):
+    if mode == 'uniform':
+        return np.random.rand(out_channels, in_channels, kernel_size)
+    elif mode == 'gaussian':
+        return np.random.normal(0, 1, size=(out_channels, in_channels, kernel_size))
+    elif mode == 'ones':
+        return np.ones(size=(out_channels, in_channels, kernel_size))
+

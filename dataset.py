@@ -13,13 +13,6 @@ import torch
 from torch.utils.data import Dataset
 from torchvision.datasets import MNIST
 
-
-def generate_kernel(mode, out_channels, in_channels, kernel_size):
-    if mode == 'random':
-        return np.random.rand(out_channels, in_channels, kernel_size)
-    elif mode == 'ones':
-        return np.ones(size=(out_channels, in_channels, kernel_size))
-
 def generate_wave(time, 
                   samples, 
                   mode, 

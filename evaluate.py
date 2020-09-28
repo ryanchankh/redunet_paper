@@ -51,6 +51,8 @@ def nearsub(train_features, train_labels, test_features, test_labels, classes, n
     scores_svd = []
     if type(classes) == int:
         classes = np.arange(classes)
+    else:
+        classes = np.array(classes)
     features_sort, _ = utils.sort_dataset(train_features, train_labels, 
                                           classes=classes, stack=False)           
     fd = features_sort[0].shape[1]
@@ -74,8 +76,8 @@ def nearsub(train_features, train_labels, test_features, test_labels, classes, n
         scores_svd.append(score_svd_j)
     test_predict_pca = np.argmin(scores_pca, axis=0)
     test_predict_svd = np.argmin(scores_svd, axis=0)
-    acc_pca = compute_accuracy(test_predict_pca, test_labels)
-    acc_svd = compute_accuracy(test_predict_svd, test_labels)
+    acc_pca = compute_accuracy(classes[test_predict_pca], test_labels)
+    acc_svd = compute_accuracy(classes[test_predict_svd], test_labels)
     print('PCA: {}'.format(acc_pca))
     print('SVD: {}'.format(acc_svd))
     return acc_svd

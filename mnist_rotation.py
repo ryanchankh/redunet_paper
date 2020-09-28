@@ -30,8 +30,8 @@ parser.add_argument('--save_dir', type=str, default='./saved_models/',
 args = parser.parse_args()
 
 model_dir = os.path.join(args.save_dir, f"mnist_rotation_-classes{args.classes}",
-                         "samples{}_layers{}_eps{}_eta{}"
-                         "".format(args.samples, args.layers, args.eps, args.eta))
+                         "samples{}_layers{}_eps{}_eta{}{}"
+                         "".format(args.samples, args.layers, args.eps, args.eta, args.tail))
 os.makedirs(model_dir, exist_ok=True)
 utils.save_params(model_dir, vars(args))
 
@@ -47,7 +47,7 @@ num_classes = classes.size
 X_train, y_train = tf.filter_class(X_train, y_train, classes, args.samples)
 X_train, y_train = tf.shuffle(X_train, y_train)
 X_test, y_test = tf.filter_class(X_test, y_test, classes, args.samples)
-X_each, y_each = tf.get_one_each(X_test, y_test)
+X_each, y_each = tf.get_n_each(X_test, y_test, 5)
 X_translate, y_translate = tf.translate_all(X_each, y_each)
 print(X_train.shape, X_test.shape, y_train.shape, y_test.shape)
 
@@ -114,3 +114,4 @@ plot.plot_heatmap(X_translate, y_translate, "X_translate", num_classes, model_di
 plot.plot_heatmap(Z_train, y_train, "Z_train", num_classes, model_dir)
 plot.plot_heatmap(Z_test, y_test, "Z_test", num_classes, model_dir)
 plot.plot_heatmap(Z_translate, y_translate, "Z_translate", num_classes, model_dir)
+plot.plot_nearsub_angle(X_train, y_train, Z_train, X_translate, y_translate, Z_translate, 20, model_dir)

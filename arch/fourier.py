@@ -76,8 +76,8 @@ class Fourier1D(Vector):
 
     def preprocess(self, X):
         Z = tf.normalize(X)
-        return np.fft.fft(X, axis=2)
+        return np.fft.fft(X, norm='ortho', axis=2)
 
     def postprocess(self, X):
-        Z = np.fft.ifft(X, axis=2)
+        Z = np.fft.ifft(X, norm='ortho', axis=2)
         return tf.normalize(Z)

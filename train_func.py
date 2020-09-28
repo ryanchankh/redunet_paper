@@ -12,14 +12,16 @@ import dataset
 import utils
 
 
-def get_one_each(X, y):
+def get_n_each(X, y, n=1):
     classes = np.unique(y)
-    _X = []
+    _X, _y = [], []
     for c in classes:
         idx = y==c
-        X_class = X[idx][0]
+        X_class = X[idx][:n]
+        y_class = y[idx][:n]
         _X.append(X_class)
-    return np.stack(_X), np.arange(classes.size)   
+        _y.append(y_class)
+    return np.stack(_X), np.hstack(_y)
 
 def translate_all(data, labels):
     n_samples, _, n_dim = data.shape

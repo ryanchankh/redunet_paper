@@ -156,3 +156,52 @@ def plot_nearsub_angle(X_train, y_train, Z_train, X_test, y_test, Z_test, n_comp
         fig.tight_layout()
         fig.savefig(os.path.join(save_dir, f'subspace_angle-Z-subspace{subspace_class}'))
         plt.close()
+
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--model_dir', type=int, help='model directory')
+    parser.add_argument('--classes', type=str, help='classes')
+
+    parser.add_argument('--loss', action='store_true', help='plot loss from training and testing')
+    parser.add_argument('--heatmap', action='store_true', help='plot heatmaps')
+    parser.add_argument('--angle', action='store_true', help='plot angle between subspace and samples')
+    args = parser.parse_args()
+
+    # load features
+    X_train = np.load(os.path.join(model_dir, "features", "X_train_features.npy"))
+    y_train = np.load(os.path.join(model_dir, "features", "Z_train_labels.npy"))
+    Z_train = np.load(os.path.join(model_dir, "features", "Z_train_features.npy"))
+    
+    X_test = np.load(os.path.join(model_dir, "features", "X_test_features.npy"))
+    y_test = np.load(os.path.join(model_dir, "features", "Z_test_labels.npy"))
+    Z_test = np.load(os.path.join(model_dir, "features", "Z_test_features.npy"))
+
+    classes = np.array(list(args.classes)).astype(np.int32)
+    X_train = tf.normalize(X_train.reshape(X_train.shape[0], -1))
+    X_test = tf.normalize(X_test.reshape(X_test.shape[0], -1))
+    Z_train = tf.normalize(Z_train.reshape(Z_train.shape[0], -1))
+    Z_test = tf.normalize(Z_test.reshape(Z_test.shape[0], -1))
+
+    # plot
+    if args.loss:
+        plot_combined_loss(model_dir)
+    if args.heatmap:
+        plot_heatmap(X_train, y_train, "X_train", classes, model_dir)
+        plot_heatmap(X_test, y_test, "X_test", classes, model_dir)
+        plot_heatmap(Z_train, y_train, "Z_train", classes, model_dir)
+        plot_heatmap(Z_test, y_test, "Z_test", classes, model_dir)
+        plot_heatmap(Z_translate, y_translate, "Z_translate", classes, model_dir)
+    
+
+    if len(X_train.shape) > 2: # multichannel data
+        X_translate = np.load(os.path.join(model_dir, "features", "X_translate_features.npy"))
+        y_translate = np.load(os.path.join(model_dir, "features", "Z_translate_labels.npy"))
+        Z_translate = np.load(os.path.join(model_dir, "features", "Z_translate_features.npy"))
+        X_translate = tf.normalize(X_translate.reshape(X_translate.shape[0], -1))
+        Z_translate = tf.normalize(Z_translate.reshape(Z_translate.shape[0], -1))
+
+        if args.heatmap:
+            plot_heatmap(X_translate, y_translate, "X_translate", classes, model_dir)
+            plot_nearsub_angle(X_train, y_train, Z_train, X_translate, y_translate, Z_translate, 20, model_dir)

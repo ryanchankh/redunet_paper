@@ -26,7 +26,7 @@ def sort_dataset(data, labels, classes, stack=False):
     sorted_data = []
     sorted_labels = []
     for c in classes:
-        idx = labels == c
+        idx = (labels == c)
         data_c = data[idx]
         labels_c = labels[idx]
         sorted_data.append(data_c)

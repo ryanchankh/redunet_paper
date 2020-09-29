@@ -40,7 +40,7 @@ def knn(train_features, train_labels, test_features, test_labels, k=5):
     print("kNN: {}".format(acc))
     return acc
 
-def nearsub(train_features, train_labels, test_features, test_labels, classes, n_comp=10):
+def nearsub(train_features, train_labels, test_features, test_labels, n_comp=10):
     """Perform nearest subspace classification.
     
     Options:
@@ -49,10 +49,7 @@ def nearsub(train_features, train_labels, test_features, test_labels, classes, n
     """
     scores_pca = []
     scores_svd = []
-    if type(classes) == int:
-        classes = np.arange(classes)
-    else:
-        classes = np.array(classes)
+    classes = np.unique(test_labels)
     features_sort, _ = utils.sort_dataset(train_features, train_labels, 
                                           classes=classes, stack=False)           
     fd = features_sort[0].shape[1]
@@ -123,11 +120,11 @@ def compute_accuracy(y_pred, y_true):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--model_dir', type=str, help='model directory')
-    parser.add_argument('--classes', type=str, help='classes')
     parser.add_argument('--k', type=int, default=5, help='number of k for k-Nearest Neighbor')
     parser.add_argument('--n_comp', type=int, default=50, help='number of components')
     args = parser.parse_args()
 
+    params = utils.load_params(args.model_dir)
     X_train = np.load(os.path.join(args.model_dir, "features", "X_train_features.npy"))
     y_train = np.load(os.path.join(args.model_dir, "features", "Z_train_labels.npy"))
     Z_train = np.load(os.path.join(args.model_dir, "features", "Z_train_features.npy"))
@@ -136,7 +133,7 @@ if __name__ == "__main__":
     y_test = np.load(os.path.join(args.model_dir, "features", "Z_test_labels.npy"))
     Z_test = np.load(os.path.join(args.model_dir, "features", "Z_test_features.npy"))
 
-    classes = np.array(list(args.classes)).astype(np.int32)
+    classes = params['classes']
     multichannel = len(X_train.shape) > 2
     X_train = tf.normalize(X_train.reshape(X_train.shape[0], -1))
     X_test = tf.normalize(X_test.reshape(X_test.shape[0], -1))
@@ -145,7 +142,7 @@ if __name__ == "__main__":
 
     _, acc_svm = svm(Z_train, y_train, Z_test, y_test)
     acc_knn = knn(Z_train, y_train, Z_test, y_test, k=args.k)
-    acc_svd = nearsub(Z_train, y_train, Z_test, y_test, classes, n_comp=args.n_comp)
+    acc_svd = nearsub(Z_train, y_train, Z_test, y_test, n_comp=args.n_comp)
     acc = {"svm": acc_svm, "knn": acc_knn, "nearsub-svd": acc_svd} 
     utils.save_params(args.model_dir, acc, name="acc_test.json")
 
@@ -158,7 +155,7 @@ if __name__ == "__main__":
 
         _, acc_svm = svm(Z_train, y_train, Z_translate, y_translate)
         acc_knn = knn(Z_train, y_train, Z_translate, y_translate, k=args.k)
-        acc_svd = nearsub(Z_train, y_train, Z_translate, y_translate, classes, n_comp=args.n_comp)
+        acc_svd = nearsub(Z_train, y_train, Z_translate, y_translate, n_comp=args.n_comp)
         acc = {"svm": acc_svm, "knn": acc_knn, "nearsub-svd": acc_svd} 
         utils.save_params(args.model_dir, acc, name="acc_translate.json")
 

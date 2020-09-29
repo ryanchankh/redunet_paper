@@ -79,23 +79,23 @@ Z_translate = tf.normalize(Z_translate.reshape(Z_translate.shape[0], -1))
 # evaluation test
 _, acc_svm = evaluate.svm(Z_train, y_train, Z_test, y_test)
 acc_knn = evaluate.knn(Z_train, y_train, Z_test, y_test, k=5)
-acc_svd = evaluate.nearsub(Z_train, y_train, Z_test, y_test, num_classes, n_comp=5)
+acc_svd = evaluate.nearsub(Z_train, y_train, Z_test, y_test, n_comp=40)
 acc = {"svm": acc_svm, "knn": acc_knn, "nearsub-svd": acc_svd} 
 utils.save_params(model_dir, acc, name="acc_test.json")
 
 # evaluation translate
 _, acc_svm = evaluate.svm(Z_train, y_train, Z_translate, y_translate)
 acc_knn = evaluate.knn(Z_train, y_train, Z_translate, y_translate, k=5)
-acc_svd = evaluate.nearsub(Z_train, y_train, Z_translate, y_translate, num_classes, n_comp=5)
+acc_svd = evaluate.nearsub(Z_train, y_train, Z_translate, y_translate, n_comp=40)
 acc = {"svm": acc_svm, "knn": acc_knn, "nearsub-svd": acc_svd} 
 utils.save_params(model_dir, acc, name="acc_translate.json")
 
 # plot
 plot.plot_combined_loss(model_dir)
-plot.plot_heatmap(X_train, y_train, "X_train", num_classes, model_dir)
-plot.plot_heatmap(X_test, y_test, "X_test", num_classes, model_dir)
-plot.plot_heatmap(X_translate, y_translate, "X_translate", num_classes, model_dir)
-plot.plot_heatmap(Z_train, y_train, "Z_train", num_classes, model_dir)
-plot.plot_heatmap(Z_test, y_test, "Z_test", num_classes, model_dir)
-plot.plot_heatmap(Z_translate, y_translate, "Z_translate", num_classes, model_dir)
-plot.plot_nearsub_angle(X_train, y_train, Z_train, X_translate, y_translate, Z_translate, 5, model_dir)
+plot.plot_heatmap(X_train, y_train, "X_train", model_dir)
+plot.plot_heatmap(X_test, y_test, "X_test", model_dir)
+plot.plot_heatmap(X_translate, y_translate, "X_translate", model_dir)
+plot.plot_heatmap(Z_train, y_train, "Z_train", model_dir)
+plot.plot_heatmap(Z_test, y_test, "Z_test", model_dir)
+plot.plot_heatmap(Z_translate, y_translate, "Z_translate", model_dir)
+plot.plot_nearsub_angle(X_train, y_train, Z_train, X_translate, y_translate, Z_translate, 40, model_dir)

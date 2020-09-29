@@ -10,7 +10,7 @@ import train_func as tf
 import utils
 
 
-def plot_heatmap(features, labels, title, classes, model_dir):
+def plot_heatmap(features, labels, title, model_dir):
     """Plot heatmap of cosine simliarity for all features. """
     num_samples = features.shape[0]
     classes = np.arange(np.unique(labels).size)
@@ -257,10 +257,10 @@ if __name__ == "__main__":
     if args.loss:
         plot_combined_loss(args.model_dir)
     if args.heatmap:
-        plot_heatmap(X_train, y_train, "X_train", classes, args.model_dir)
-        plot_heatmap(X_test, y_test, "X_test", classes, args.model_dir)
-        plot_heatmap(Z_train, y_train, "Z_train", classes, args.model_dir)
-        plot_heatmap(Z_test, y_test, "Z_test", classes, args.model_dir)
+        plot_heatmap(X_train, y_train, "X_train", args.model_dir)
+        plot_heatmap(X_test, y_test, "X_test", args.model_dir)
+        plot_heatmap(Z_train, y_train, "Z_train", args.model_dir)
+        plot_heatmap(Z_test, y_test, "Z_test", args.model_dir)
     if args.pca:
         plot_pca(X_train, y_train, args.n_comp, "X", classes, args.model_dir)
         plot_pca(Z_train, y_train, args.n_comp, "Z", classes, args.model_dir)
@@ -284,8 +284,8 @@ if __name__ == "__main__":
         Z_translate = tf.normalize(Z_translate.reshape(Z_translate.shape[0], -1))
 
         if args.heatmap:
-            plot_heatmap(X_translate, y_translate, "X_translate", classes, args.model_dir)
-            plot_heatmap(Z_translate, y_translate, "Z_translate", classes, args.model_dir)
+            plot_heatmap(X_translate, y_translate, "X_translate", args.model_dir)
+            plot_heatmap(Z_translate, y_translate, "Z_translate", args.model_dir)
         if args.angle:
             plot_nearsub_angle(X_train, y_train, Z_train, 
                                X_translate, y_translate, Z_translate, 

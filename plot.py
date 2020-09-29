@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 from torch.nn.functional import normalize
 from mpl_toolkits.mplot3d import Axes3D
 from MulticoreTSNE import MulticoreTSNE as TSNE
-from sklearn.decomposition import TruncatedSVD
+from sklearn.decomposition import TruncatedSVD, PCA
 import train_func as tf
 import utils
 
@@ -154,6 +154,45 @@ def plot_nearsub_angle(X_train, y_train, Z_train, X_test, y_test, Z_test, n_comp
         fig.savefig(os.path.join(save_dir, f'subspace_angle-dim{n_comp}-Z-subspace{subspace_class}'))
         plt.close()
 
+def plot_pca(features, labels, n_comp, title, classes, model_dir):
+    pca_dir = os.path.join(model_dir, 'figures', 'pca')
+    os.makedirs(pca_dir, exist_ok=True)
+
+    if type(classes) == int:
+        classes = np.arange(classes)
+    features_sort, _ = utils.sort_dataset(features, labels, 
+                            classes=classes, stack=False)
+
+    pca = PCA(n_components=n_comp).fit(features)
+    sig_vals = [pca.singular_values_]
+    for c in classes: 
+        pca = PCA(n_components=n_comp).fit(features_sort[c])
+        sig_vals.append((pca.singular_values_))
+
+    ## plot features
+    fig, ax = plt.subplots(ncols=1, nrows=1, figsize=(7, 5), dpi=500)
+    x_min = np.min([len(sig_val) for sig_val in sig_vals])
+    # ax.plot(np.arange(x_min), sig_vals[0][:x_min], '-p', markersize=3, markeredgecolor='black',
+    #     linewidth=1.5, color='tomato')
+    map_vir = plt.cm.get_cmap('Blues', 6)
+    norm = plt.Normalize(-10, 10)
+    norm_class = norm(classes)
+    color = map_vir(norm_class)
+    for c, sig_val in enumerate(sig_vals[1:]):
+        ax.plot(np.arange(x_min), sig_val[:x_min], '-o', markersize=3, markeredgecolor='black',
+                alpha=0.6, linewidth=1.0, color=color[c])
+    ax.set_xticks(np.arange(0, x_min, 5))
+    ax.set_yticks(np.arange(0, 35, 5))
+    ax.set_xlabel("components", fontsize=14)
+    ax.set_ylabel("sigular values", fontsize=14)
+    [tick.label.set_fontsize(12) for tick in ax.xaxis.get_major_ticks()] 
+    [tick.label.set_fontsize(12) for tick in ax.yaxis.get_major_ticks()]
+    fig.tight_layout()
+    
+    file_name = os.path.join(pca_dir, f"pca_{title}")
+    fig.savefig(file_name)
+    plt.close()
+
 
 
 if __name__ == "__main__":
@@ -165,6 +204,7 @@ if __name__ == "__main__":
     parser.add_argument('--loss', action='store_true', help='plot loss from training and testing')
     parser.add_argument('--heatmap', action='store_true', help='plot heatmaps')
     parser.add_argument('--angle', action='store_true', help='plot angle between subspace and samples')
+    parser.add_argument('--pca', action='store_true', help='plot pca')
     args = parser.parse_args()
 
     # load features
@@ -191,7 +231,9 @@ if __name__ == "__main__":
         plot_heatmap(X_test, y_test, "X_test", classes, args.model_dir)
         plot_heatmap(Z_train, y_train, "Z_train", classes, args.model_dir)
         plot_heatmap(Z_test, y_test, "Z_test", classes, args.model_dir)
-    
+    if args.pca:
+        plot_pca(X_train, y_train, args.n_comp, "X", classes, args.model_dir)
+        plot_pca(Z_train, y_train, args.n_comp, "Z", classes, args.model_dir)
 
     if multichannel: # multichannel data
         X_translate = np.load(os.path.join(args.model_dir, "features", "X_translate_features.npy"))

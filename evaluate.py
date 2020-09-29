@@ -118,3 +118,50 @@ def compute_accuracy(y_pred, y_true):
     """Compute accuracy by counting correct classification. """
     assert y_pred.shape == y_true.shape
     return 1 - np.count_nonzero(y_pred - y_true) / y_true.size
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--model_dir', type=str, help='model directory')
+    parser.add_argument('--classes', type=str, help='classes')
+    parser.add_argument('--k', type=int, default=5, help='number of k for k-Nearest Neighbor')
+    parser.add_argument('--n_comp', type=int, default=50, help='number of components')
+    args = parser.parse_args()
+
+    X_train = np.load(os.path.join(args.model_dir, "features", "X_train_features.npy"))
+    y_train = np.load(os.path.join(args.model_dir, "features", "Z_train_labels.npy"))
+    Z_train = np.load(os.path.join(args.model_dir, "features", "Z_train_features.npy"))
+    
+    X_test = np.load(os.path.join(args.model_dir, "features", "X_test_features.npy"))
+    y_test = np.load(os.path.join(args.model_dir, "features", "Z_test_labels.npy"))
+    Z_test = np.load(os.path.join(args.model_dir, "features", "Z_test_features.npy"))
+
+    classes = np.array(list(args.classes)).astype(np.int32)
+    multichannel = len(X_train.shape) > 2
+    X_train = tf.normalize(X_train.reshape(X_train.shape[0], -1))
+    X_test = tf.normalize(X_test.reshape(X_test.shape[0], -1))
+    Z_train = tf.normalize(Z_train.reshape(Z_train.shape[0], -1))
+    Z_test = tf.normalize(Z_test.reshape(Z_test.shape[0], -1))
+
+    _, acc_svm = svm(Z_train, y_train, Z_test, y_test)
+    acc_knn = knn(Z_train, y_train, Z_test, y_test, k=args.k)
+    acc_svd = nearsub(Z_train, y_train, Z_test, y_test, classes, n_comp=args.n_comp)
+    acc = {"svm": acc_svm, "knn": acc_knn, "nearsub-svd": acc_svd} 
+    utils.save_params(args.model_dir, acc, name="acc_test.json")
+
+    if multichannel: # multichannel data
+        X_translate = np.load(os.path.join(args.model_dir, "features", "X_translate_features.npy"))
+        y_translate = np.load(os.path.join(args.model_dir, "features", "X_translate_labels.npy"))
+        Z_translate = np.load(os.path.join(args.model_dir, "features", "Z_translate_features.npy"))
+        X_translate = tf.normalize(X_translate.reshape(X_translate.shape[0], -1))
+        Z_translate = tf.normalize(Z_translate.reshape(Z_translate.shape[0], -1))
+
+        _, acc_svm = svm(Z_train, y_train, Z_translate, y_translate)
+        acc_knn = knn(Z_train, y_train, Z_translate, y_translate, k=args.k)
+        acc_svd = nearsub(Z_train, y_train, Z_translate, y_translate, classes, n_comp=args.n_comp)
+        acc = {"svm": acc_svm, "knn": acc_knn, "nearsub-svd": acc_svd} 
+        utils.save_params(args.model_dir, acc, name="acc_translate.json")
+
+
+
+

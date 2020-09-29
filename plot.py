@@ -39,6 +39,9 @@ def plot_heatmap(features, labels, title, classes, model_dir):
 def plot_combined_loss(model_dir):
     """Plot theoretical loss and empirical loss. """
     ## extract loss from csv
+    plt.rc('text', usetex=True)
+    plt.rcParams['font.family'] = 'serif'
+    plt.rcParams['font.serif'] = ['Times New Roman']
     fig, ax = plt.subplots(1, 1, figsize=(7, 5), sharey=True, sharex=True)
     models = ['train', 'test']
     linestyles = ['solid', 'dashed']
@@ -57,9 +60,11 @@ def plot_combined_loss(model_dir):
         ax.plot(num_iter, comp, label=r'$R^c$  ({})'.format(model), 
                 color='coral', linewidth=1.0, alpha=0.8, linestyle=linestyle)
 
-    ax.set_ylabel('Loss', fontsize=10)
-    ax.set_xlabel('Number of iterations', fontsize=10)
-    ax.legend(loc='best', prop={"size": 5}, ncol=3, framealpha=0.5)
+    ax.set_ylabel('Loss', fontsize=14)
+    ax.set_xlabel('Layers', fontsize=14)
+    ax.legend(loc='best', prop={"size": 9}, ncol=2, framealpha=0.5)
+    [tick.label.set_fontsize(14) for tick in ax.xaxis.get_major_ticks()] 
+    [tick.label.set_fontsize(14) for tick in ax.yaxis.get_major_ticks()]
     plt.tight_layout()
     
     save_dir = os.path.join(model_dir, 'figures', 'loss')

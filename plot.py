@@ -246,4 +246,7 @@ if __name__ == "__main__":
             plot_heatmap(X_translate, y_translate, "X_translate", classes, args.model_dir)
             plot_heatmap(Z_translate, y_translate, "Z_translate", classes, args.model_dir)
         if args.angle:
-            plot_nearsub_angle(X_train, y_train, Z_train, X_translate, y_translate, Z_translate, args.n_comp, args.model_dir)
+            plot_nearsub_angle(X_train, y_train, Z_train, 
+                               X_translate, y_translate, Z_translate, 
+                               args.n_comp, args.model_dir)
+#            plot_nearsub_angle(X_train, y_train, Z_train, X_test, y_test, Z_test, args.n_comp, args.model_dir)

@@ -18,8 +18,6 @@ def plot_heatmap(features, labels, title, classes, model_dir):
         classes = np.arange(classes)
     features_sort_, _ = utils.sort_dataset(features, labels, 
                             classes=classes, stack=True)
-    print(features_sort_.shape)
-    # features_sort_ = np.vstack(features_sort)
     sim_mat = np.abs(features_sort_ @ features_sort_.T)
     print(sim_mat.min(), sim_mat.max())
 
@@ -101,7 +99,6 @@ def plot_nearsub_angle(X_train, y_train, Z_train, X_test, y_test, Z_test, n_comp
     Z_train = tf.normalize(Z_train.reshape(Z_train.shape[0], -1))
     X_test = tf.normalize(X_test.reshape(X_test.shape[0], -1))
     X_train = tf.normalize(X_train.reshape(X_train.shape[0], -1))
-    print(X_train.shape, Z_train.shape)
     
     # with X
     fd = X_train.shape[1]
@@ -188,23 +185,23 @@ if __name__ == "__main__":
 
     # plot
     if args.loss:
-        plot_combined_loss(model_dir)
+        plot_combined_loss(args.model_dir)
     if args.heatmap:
         plot_heatmap(X_train, y_train, "X_train", classes, args.model_dir)
         plot_heatmap(X_test, y_test, "X_test", classes, args.model_dir)
         plot_heatmap(Z_train, y_train, "Z_train", classes, args.model_dir)
         plot_heatmap(Z_test, y_test, "Z_test", classes, args.model_dir)
-        plot_heatmap(Z_translate, y_translate, "Z_translate", classes, args.model_dir)
     
 
     if multichannel: # multichannel data
         X_translate = np.load(os.path.join(args.model_dir, "features", "X_translate_features.npy"))
-        y_translate = np.load(os.path.join(args.model_dir, "features", "Z_translate_labels.npy"))
+        y_translate = np.load(os.path.join(args.model_dir, "features", "X_translate_labels.npy"))
         Z_translate = np.load(os.path.join(args.model_dir, "features", "Z_translate_features.npy"))
         X_translate = tf.normalize(X_translate.reshape(X_translate.shape[0], -1))
         Z_translate = tf.normalize(Z_translate.reshape(Z_translate.shape[0], -1))
 
         if args.heatmap:
             plot_heatmap(X_translate, y_translate, "X_translate", classes, args.model_dir)
+            plot_heatmap(Z_translate, y_translate, "Z_translate", classes, args.model_dir)
         if args.angle:
             plot_nearsub_angle(X_train, y_train, Z_train, X_translate, y_translate, Z_translate, args.n_comp, args.model_dir)

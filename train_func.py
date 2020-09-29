@@ -48,7 +48,9 @@ def filter_class(data, labels, classes, num_samples=None):
         idx = labels == _class
         data_filter.append(data[idx][:num_samples])
         labels_filter.append(labels[idx][:num_samples])
-    return np.vstack(data_filter), np.hstack(labels_filter)
+    data_new = np.vstack(data_filter)
+    labels_new = np.unique(np.hstack(labels_filter), return_inverse=True)[1]
+    return data_new, labels_new
     
 def normalize(X, p=2):
     axes = tuple(np.arange(1, len(X.shape)).tolist())

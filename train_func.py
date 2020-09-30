@@ -23,13 +23,27 @@ def get_n_each(X, y, n=1):
         _y.append(y_class)
     return np.vstack(_X), np.hstack(_y)
 
-def translate_all(data, labels, stride=1):
+def translate1d(data, labels, stride=1):
     n_samples, _, n_dim = data.shape
     data_new, labels_new = [], []
     for i in range(n_samples):
         for r in range(0, n_dim, stride):
             data_new.append(np.roll(data[i], r, axis=1))
             labels_new.append(labels[i])
+    data = np.stack(data_new)
+    labels = np.array(labels_new)
+    return data, labels
+
+translate_all = translate1d
+
+def translate2d(data, labels, stride=1):
+    n_samples, _, H, W = data.shape
+    data_new, labels_new = [], []
+    for i in range(n_samples):
+        for h in range(0, H, stride):
+            for w in range(0, W, stride):
+                data_new.append(np.roll(data[i], (h, w), axis=(1, 2)))
+                labels_new.append(labels[i])
     data = np.stack(data_new)
     labels = np.array(labels_new)
     return data, labels

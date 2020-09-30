@@ -1,3 +1,9 @@
+import time
+import numpy as np
+
+from .vector import Vector
+import train_func as tf
+
 class Fourier2D(Vector):
     def __init__(self, layers, eta, eps, lmbda=5000):
         super().__init__(layers, eta, eps, lmbda)

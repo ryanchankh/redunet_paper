@@ -45,8 +45,8 @@ y_test = np.load('./data/mnist_rotation/mnist_y_test_C5_T200.npy')
 X_train, y_train = tf.filter_class(X_train, y_train, args.classes, args.samples)
 X_train, y_train = tf.shuffle(X_train, y_train)
 X_test, y_test = tf.filter_class(X_test, y_test, args.classes, args.samples)
-X_each, y_each = tf.get_n_each(X_test, y_test, 5)
-X_translate, y_translate = tf.translate_all(X_each, y_each)
+X_each, y_each = tf.get_n_each(X_test, y_test, 20)
+X_translate, y_translate = tf.translate_all(X_each, y_each, stride=5)
 
 # setup architecture
 layers = [Fourier1D(args.layers, eta=args.eta, eps=args.eps)]
@@ -88,7 +88,7 @@ utils.save_params(model_dir, acc, name="acc_test.json")
 # evaluation translate
 _, acc_svm = evaluate.svm(Z_train, y_train, Z_translate, y_translate)
 acc_knn = evaluate.knn(Z_train, y_train, Z_translate, y_translate, k=5)
-acc_svd = evaluate.nearsub(Z_train, y_train, Z_translate, y_translate, n_comp=100)
+acc_svd = evaluate.nearsub(Z_train, y_train, Z_translate, y_translate, n_comp=200)
 acc = {"svm": acc_svm, "knn": acc_knn, "nearsub-svd": acc_svd} 
 utils.save_params(model_dir, acc, name="acc_translate.json")
 
@@ -100,4 +100,4 @@ plot.plot_heatmap(X_translate, y_translate, "X_translate", model_dir)
 plot.plot_heatmap(Z_train, y_train, "Z_train", model_dir)
 plot.plot_heatmap(Z_test, y_test, "Z_test", model_dir)
 plot.plot_heatmap(Z_translate, y_translate, "Z_translate", model_dir)
-plot.plot_nearsub_angle(X_train, y_train, Z_train, X_translate, y_translate, Z_translate, 100, model_dir)
+plot.plot_nearsub_angle(X_train, y_train, Z_train, X_translate, y_translate, Z_translate, 200, model_dir)

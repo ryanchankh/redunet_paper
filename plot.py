@@ -23,7 +23,7 @@ def plot_heatmap(features, labels, title, model_dir):
     plt.rcParams['font.family'] = 'serif'
     plt.rcParams['font.serif'] = ['Times New Roman']
     fig, ax = plt.subplots(figsize=(7, 5), sharey=True, sharex=True, dpi=400)
-    im = ax.imshow(sim_mat)#, cmap='Blues')
+    im = ax.imshow(sim_mat, cmap='Blues')
     fig.colorbar(im, pad=0.02, drawedges=0, ticks=[0, 0.5, 1])
     ax.set_xticks(np.linspace(0, num_samples, len(classes)+1))
     ax.set_yticks(np.linspace(0, num_samples, len(classes)+1))
@@ -120,63 +120,48 @@ def plot_3d(Z, y, name, model_dir):
     fig.savefig(os.path.join(savedir, f"scatter3d-{name}.pdf"), dpi=200)
     plt.close()
 
-def plot_nearsub_angle(X_train, y_train, Z_train, X_test, y_test, Z_test, n_comp, model_dir, tail=""):
+def plot_nearsub_angle(train_features, train_labels, test_features, test_labels, 
+                       n_comp, model_dir, title, tail=""):
+    def least_square(train_features, test_features, n_comp):
+        U, S, V = np.linalg.svd(train_features)
+        U = U[:, :n_comp]
+        S = np.diag(S[:n_comp])
+        V = V[:n_comp, :] 
+        X = U @ S @ V
+
+        theta, r, rank, sig_val = np.linalg.lstsq(X.T, test_features.T, rcond=-1)
+        out = theta.T @ X - test_features
+        residual = np.linalg.norm(out, ord=2, axis=1)
+        return residual
     save_dir = os.path.join(model_dir, "figures", "subspace_angle")
     os.makedirs(save_dir, exist_ok=True)
     
     colors = ['blue', 'red', 'green']
     classes = np.unique(y_train)
-    
-    # with X
-    fd = X_train.shape[1]
-    if n_comp >= fd:
-        n_comp = fd - 1
-    for subspace_class in classes:
-        plt.rcParams['font.family'] = 'serif'
-        plt.rcParams['font.serif'] = ['Times New Roman']
-        fig, ax = plt.subplots(figsize=(7, 5), dpi=300)
-        for c in classes:
-            X_train_c = X_train[y_train==subspace_class]
-            X_test_c = X_test[y_test==c]
-            svd = TruncatedSVD(n_components=n_comp).fit(X_train_c)
-            svd_subspace = svd.components_.T
-            svd_j = (np.eye(fd) - svd_subspace @ svd_subspace.T) \
-                                @ (X_test_c).T
-            score_svd_j = np.linalg.norm(svd_j, ord=2, axis=0)
-            ax.hist(score_svd_j, bins=np.linspace(0, 1, 50), alpha=0.8, color=colors[c])
-        ax.set_xlabel('similarity', fontsize=14)
-        ax.set_ylabel('count', fontsize=14)
-        ax.set_xlim([0, 1])
-        [tick.label.set_fontsize(14) for tick in ax.xaxis.get_major_ticks()] 
-        [tick.label.set_fontsize(14) for tick in ax.yaxis.get_major_ticks()]
-        fig.tight_layout()
-        fig.savefig(os.path.join(save_dir, f'subspace_angle-dim{n_comp}-X-subspace{subspace_class}{tail}.pdf'))
-        plt.close()
 
-    # with Z
-    fd = Z_train.shape[1]
-    if n_comp >= fd:
-        n_comp = fd - 1
-    for subspace_class in classes:
+    fs_train, _ = utils.sort_dataset(train_features, train_labels, 
+                        classes=classes, stack=False)
+    fs_test, _ = utils.sort_dataset(test_features, test_labels, 
+                            classes=classes, stack=False)
+    for class_train in classes:
         plt.rcParams['font.family'] = 'serif'
         plt.rcParams['font.serif'] = ['Times New Roman']
-        fig, ax = plt.subplots(figsize=(7, 5), dpi=300)
-        for c in classes:
-            Z_train_c = Z_train[y_train==subspace_class]
-            Z_test_c = Z_test[y_test==c]
-            svd = TruncatedSVD(n_components=n_comp).fit(Z_train_c)
-            svd_subspace = svd.components_.T
-            svd_j = (np.eye(fd) - svd_subspace @ svd_subspace.T) \
-                                @ (Z_test_c).T
-            score_svd_j = np.linalg.norm(svd_j, ord=2, axis=0)  
-            ax.hist(score_svd_j, bins=np.linspace(0, 1, 50), alpha=0.8, color=colors[c])
-        ax.set_xlabel('similarity', fontsize=14)
-        ax.set_ylabel('count', fontsize=14)
-        ax.set_xlim([0, 1])
+        fig, ax = plt.subplots(figsize=(6, 5), dpi=300)
+        
+        for class_test in classes:
+            _bins = np.linspace(-0.05, 1.05, 21)
+            residuals = least_square(fs_train[class_train], fs_test[class_test], n_comp)
+
+            ax.hist(residuals, bins=_bins, alpha=0.5, color=colors[class_test], 
+                    edgecolor='black', label=f'Class {class_test}')
+
+        ax.set_xlabel('Similarity', fontsize=14)
+        ax.set_ylabel('Count', fontsize=14)
         [tick.label.set_fontsize(14) for tick in ax.xaxis.get_major_ticks()] 
         [tick.label.set_fontsize(14) for tick in ax.yaxis.get_major_ticks()]
+        ax.legend(loc='upper right', prop={"size": 15}, ncol=1, framealpha=0.5)
         fig.tight_layout()
-        fig.savefig(os.path.join(save_dir, f'subspace_angle-dim{n_comp}-Z-subspace{subspace_class}{tail}.pdf'))
+        fig.savefig(os.path.join(save_dir, f'subspace_angle-dim{n_comp}-{title}-subspace{class_train}{tail}.pdf'))
         plt.close()
 
 def plot_pca(features, labels, n_comp, title, classes, model_dir):
@@ -284,10 +269,11 @@ if __name__ == "__main__":
             plot_heatmap(X_translate, y_translate, "X_translate", args.model_dir)
             plot_heatmap(Z_translate, y_translate, "Z_translate", args.model_dir)
         if args.angle:
-            plot_nearsub_angle(X_train, y_train, Z_train, 
-                               X_translate, y_translate, Z_translate, 
-                               args.n_comp, args.model_dir, args.tail)
-            # print(X_train.shape, Z_train.shape, X_test.shape, Z_test.shape)
-            # plot_nearsub_angle(X_train, y_train, Z_train, 
-            #                   X_test, y_test, Z_test, 
-            #                   args.n_comp, args.model_dir, args.tail)
+            plot_nearsub_angle(X_train, y_train, X_test, y_test, 
+                               args.n_comp, args.model_dir, "X-test", args.tail)
+            plot_nearsub_angle(X_train, y_train, X_translate, y_translate, 
+                               args.n_comp, args.model_dir, "X-translate", args.tail)
+            plot_nearsub_angle(Z_train, y_train, Z_test, y_test, 
+                               args.n_comp, args.model_dir, "Z-test", args.tail)
+            plot_nearsub_angle(Z_train, y_train, Z_translate, y_translate, 
+                               args.n_comp, args.model_dir, "Z-translate", args.tail)

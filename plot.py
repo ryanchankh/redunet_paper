@@ -71,12 +71,14 @@ def plot_combined_loss(model_dir):
     ax.set_xlabel('Layers', fontsize=40)
     # ax.set_ylim((-0.05, 2.8)) # gaussian2d
     # ax.set_yticks(np.linspace(0, 2.5, 6)) # gaussian2d
+    ax.set_ylim((-0.05, 2.5)) # gaussian2d
+    ax.set_yticks(np.linspace(0, 2.5, 6)) # gaussian2d
     # ax.set_ylim((0, 4.0)) # gaussian3d
     # ax.set_yticks(np.linspace(0, 4.0, 9)) # gaussian3d
     # ax.set_ylim((-0.005, 0.075)) # mnist_rotation_classes01
     # ax.set_yticks(np.linspace(0, 0.075, 6)) # mnist_rotation_classes01
-    ax.set_ylim((-0.015, 0.1)) # sinusoid
-    ax.set_yticks(np.linspace(0, 0.1, 5)) # sinusoid
+    # ax.set_ylim((-0.015, 0.1)) # sinusoid
+    # ax.set_yticks(np.linspace(0, 0.1, 5)) # sinusoid
     # ax.legend(loc='lower right', prop={"size": 15}, ncol=3, framealpha=0.5)
     ax.legend(loc='lower right', prop={"size": 13}, ncol=3, framealpha=0.5)
     [tick.label.set_fontsize(22) for tick in ax.xaxis.get_major_ticks()] 

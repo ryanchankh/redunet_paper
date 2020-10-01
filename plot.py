@@ -181,6 +181,80 @@ def plot_nearsub_angle(train_features, train_labels, test_features, test_labels,
         fig.savefig(os.path.join(save_dir, f'subspace_angle-dim{n_comp}-{title}-subspace{class_train}{tail}.pdf'), dpi=200)
         plt.close()
 
+def plot_nearsub_angle(train_features, train_labels, test_features, test_labels, 
+                       n_comp, model_dir, title, tail=""):
+    def least_square(train_features, test_features, n_comp):
+        U, S, V = np.linalg.svd(train_features)
+        U = U[:, :n_comp]
+        S = np.diag(S[:n_comp])
+        V = V[:n_comp, :] 
+        X = U @ S @ V
+
+        theta, r, rank, sig_val = np.linalg.lstsq(X.T, test_features.T, rcond=-1)
+        out = theta.T @ X - test_features
+        residual = np.linalg.norm(out, ord=2, axis=1)
+        return residual
+    save_dir = os.path.join(model_dir, "figures", "subspace_angle")
+    os.makedirs(save_dir, exist_ok=True)
+    
+    colors = ['blue', 'red', 'green']
+    classes = np.unique(y_train)
+    fs_train, _ = utils.sort_dataset(train_features, train_labels, 
+                        classes=classes, stack=False)
+    fs_test, _ = utils.sort_dataset(test_features, test_labels, 
+                            classes=classes, stack=False)
+    for class_train in classes:
+        plt.rc('text', usetex=True)
+        plt.rcParams['font.family'] = 'serif'
+        plt.rcParams['font.serif'] = ['Times New Roman']
+        fig, ax = plt.subplots(figsize=(7, 5))
+        
+        for class_test in classes:
+            _bins = np.linspace(-0.05, 1.05, 21)
+            residuals = least_square(fs_train[class_train], fs_test[class_test], n_comp)
+            print('class_train', class_train, 'class_test', class_test, 'residuals', residuals[:10])
+            ax.hist(residuals, bins=_bins, alpha=0.5, color=colors[class_test], 
+                    edgecolor='black', label=f'Class {class_test}')
+
+        ax.set_xlabel('Distance', fontsize=22)
+        ax.set_ylabel('Count', fontsize=22)
+        [tick.label.set_fontsize(22) for tick in ax.xaxis.get_major_ticks()] 
+        [tick.label.set_fontsize(22) for tick in ax.yaxis.get_major_ticks()]
+        ax.legend(loc='upper center', prop={"size": 13}, ncol=1, framealpha=0.5)
+        fig.tight_layout()
+        fig.savefig(os.path.join(save_dir, f'subspace_angle-dim{n_comp}-{title}-subspace{class_train}{tail}.pdf'), dpi=200)
+        plt.close()
+
+def plot_sample_angle(train_features, train_labels, test_features, test_labels, model_dir, title1, title2, tail=""):
+    save_dir = os.path.join(model_dir, "figures", "sample_angle")
+    os.makedirs(save_dir, exist_ok=True)
+    
+    colors = ['blue', 'red', 'green']
+    _bins = np.linspace(-0.05, 1.05, 21)
+
+    classes = np.unique(y_train)
+    fs_train, _ = utils.sort_dataset(train_features, train_labels, 
+                        classes=classes, stack=False)
+    fs_test, _ = utils.sort_dataset(test_features, test_labels, 
+                            classes=classes, stack=False)
+    for class_train in classes:
+        plt.rc('text', usetex=True)
+        plt.rcParams['font.family'] = 'serif'
+        plt.rcParams['font.serif'] = ['Times New Roman']
+        fig, ax = plt.subplots(figsize=(7, 5))
+        for class_test in classes:
+            angles = (fs_train[class_train] @ fs_test[class_test].T).reshape(-1)
+            ax.hist(angles, bins=_bins, alpha=0.5, color=colors[class_test], 
+                    edgecolor='black', label=f'Class {class_test}')
+        ax.set_xlabel('Similarity', fontsize=22)
+        ax.set_ylabel('Count', fontsize=22)
+        [tick.label.set_fontsize(22) for tick in ax.xaxis.get_major_ticks()] 
+        [tick.label.set_fontsize(22) for tick in ax.yaxis.get_major_ticks()]
+        ax.legend(loc='upper center', prop={"size": 13}, ncol=1, framealpha=0.5)
+        fig.tight_layout()
+        fig.savefig(os.path.join(save_dir, f'sample_angle-{title1}{class_train}-vs-{title2}{tail}.pdf'), dpi=200)
+        plt.close()
+
 def plot_pca(features, labels, n_comp, title, classes, model_dir):
     pca_dir = os.path.join(model_dir, 'figures', 'pca')
     os.makedirs(pca_dir, exist_ok=True)
@@ -232,7 +306,8 @@ if __name__ == "__main__":
     parser.add_argument('--loss', action='store_true', help='plot loss from training and testing')
     parser.add_argument('--scatter', action='store_true', help='plot scatter')
     parser.add_argument('--heatmap', action='store_true', help='plot heatmaps')
-    parser.add_argument('--angle', action='store_true', help='plot angle between subspace and samples')
+    parser.add_argument('--subspace_angle', action='store_true', help='plot angle between subspace and samples')
+    parser.add_argument('--sample_angle', action='store_true', help='plot angle between train and test samples')
     parser.add_argument('--pca', action='store_true', help='plot pca')
     args = parser.parse_args()
 
@@ -291,7 +366,7 @@ if __name__ == "__main__":
         if args.heatmap:
             plot_heatmap(X_translate, y_translate, "X_translate", args.model_dir)
             plot_heatmap(Z_translate, y_translate, "Z_translate", args.model_dir)
-        if args.angle:
+        if args.subspace_angle:
             plot_nearsub_angle(X_train, y_train, X_test, y_test, 
                                args.n_comp, args.model_dir, "X-test", args.tail)
             plot_nearsub_angle(X_train, y_train, X_translate, y_translate, 
@@ -300,3 +375,13 @@ if __name__ == "__main__":
                                args.n_comp, args.model_dir, "Z-test", args.tail)
             plot_nearsub_angle(Z_train, y_train, Z_translate, y_translate, 
                                args.n_comp, args.model_dir, "Z-translate", args.tail)
+        if args.sample_angle:
+            plot_sample_angle(X_train, y_train, X_test, y_test, args.model_dir, "X-train", "test", args.tail)
+            plot_sample_angle(X_train, y_train, X_translate, y_translate, args.model_dir, "X-train", "translate", args.tail)
+            plot_sample_angle(Z_train, y_train, Z_test, y_test, args.model_dir, "Z-train", "test", args.tail)
+            plot_sample_angle(Z_train, y_train, Z_translate, y_translate, args.model_dir, "Z-train", "translate", args.tail)
+
+            plot_sample_angle(X_test, y_test, X_test, y_test, args.model_dir, "X-test", "test", args.tail)
+            plot_sample_angle(X_test, y_test, X_translate, y_translate, args.model_dir, "X-test", "translate", args.tail)
+            plot_sample_angle(Z_test, y_test, Z_test, y_test, args.model_dir, "Z-test", "test", args.tail)
+            plot_sample_angle(Z_test, y_test, Z_translate, y_translate, args.model_dir, "Z-test", "translate", args.tail)

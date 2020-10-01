@@ -134,6 +134,14 @@ def generate_scurve(samples, noise, num_classes):
 def generate_2d(data, noise, samples, shuffle=False):
     if data == 1:
         centers = [(1, 0), (0, 1)]
+    elif data == 2:
+        centers = [(np.cos(np.pi/3), np.sin(np.pi/3)), (1 ,0)]
+    elif data == 3:
+        centers = [(np.cos(np.pi/4), np.sin(np.pi/4)), (1 ,0)]
+    elif data == 4:
+        centers = [(np.cos(3*np.pi/4), np.sin(3*np.pi/4)), (1 ,0)]
+    elif data == 5:
+        centers = [(np.cos(2*np.pi/3), np.sin(2*np.pi/3)), (1 ,0)]
     else:
         raise NameErorr('data not found.')
 

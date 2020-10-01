@@ -5,6 +5,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from torch.nn.functional import normalize
 from mpl_toolkits.mplot3d import Axes3D
+from mpl_toolkits.axes_grid1 import make_axes_locatable
 from sklearn.decomposition import TruncatedSVD, PCA
 import train_func as tf
 import utils
@@ -22,13 +23,17 @@ def plot_heatmap(features, labels, title, model_dir):
     plt.rc('text', usetex=True)
     plt.rcParams['font.family'] = 'serif'
     plt.rcParams['font.serif'] = ['Times New Roman']
-    fig, ax = plt.subplots(figsize=(7, 5), sharey=True, sharex=True, dpi=400)
+    fig, ax = plt.subplots(figsize=(8, 7), sharey=True, sharex=True, dpi=400)
     im = ax.imshow(sim_mat, cmap='Blues')
-    fig.colorbar(im, pad=0.02, drawedges=0, ticks=[0, 0.5, 1])
+    divider = make_axes_locatable(ax)
+    cax = divider.append_axes("right", size="5%", pad=0.1)
+    cbar = fig.colorbar(im, cax=cax, drawedges=0, ticks=[0, 0.5, 1])
+    cbar.ax.tick_params(labelsize=18)
+    # fig.colorbar(im, pad=0.02, drawedges=0, ticks=[0, 0.5, 1])
     ax.set_xticks(np.linspace(0, num_samples, len(classes)+1))
     ax.set_yticks(np.linspace(0, num_samples, len(classes)+1))
-    [tick.label.set_fontsize(14) for tick in ax.xaxis.get_major_ticks()] 
-    [tick.label.set_fontsize(14) for tick in ax.yaxis.get_major_ticks()]
+    [tick.label.set_fontsize(24) for tick in ax.xaxis.get_major_ticks()] 
+    [tick.label.set_fontsize(24) for tick in ax.yaxis.get_major_ticks()]
     fig.tight_layout()
     
     save_dir = os.path.join(model_dir, "figures", "heatmaps")
@@ -37,35 +42,46 @@ def plot_heatmap(features, labels, title, model_dir):
     plt.close()
 
 def plot_combined_loss(model_dir):
-    """Plot theoretical loss and empirical loss. """
-    ## extract loss from csv
+    """Plot theoretical loss and empirical loss. 
+
+    Figure 3: gaussian2d, gaussian3d, fontsize 24
+
+    """
     plt.rc('text', usetex=True)
     plt.rcParams['font.family'] = 'serif'
     plt.rcParams['font.serif'] = ['Times New Roman']
     fig, ax = plt.subplots(1, 1, figsize=(7, 5), sharey=True, sharex=True)
     models = ['train', 'test']
     linestyles = ['solid', 'dashed']
-    for model, linestyle in zip(models, linestyles):
+    markers = ['o', 'D']
+    markersizes = [4.5, 3]
+    alphas = [0.5, 0.9]
+    names = ['$\Delta R$ ', '$R$', '$R^c$']
+    colors = ['green', 'royalblue', 'coral']
+    for model, linestyle, marker, alpha, markersize in zip(models, linestyles, markers, alphas, markersizes):
         filename = os.path.join(model_dir, "loss", f'{model}.csv')
         data = pd.read_csv(filename)
-        expd = data['loss_expd'].ravel()
-        comp = data['loss_comp'].ravel()
-        total = data['loss_total'].ravel()
-
-        num_iter = np.arange(total.size)
-        ax.plot(num_iter, total, label=r'$\Delta R$ ({})'.format(model), 
-            color='green', linewidth=1.0, alpha=0.8, linestyle=linestyle)
-        ax.plot(num_iter, expd, label=r'$R$  ({})'.format(model), 
-                color='royalblue', linewidth=1.0, alpha=0.8, linestyle=linestyle)
-        ax.plot(num_iter, comp, label=r'$R^c$  ({})'.format(model), 
-                color='coral', linewidth=1.0, alpha=0.8, linestyle=linestyle)
-
-    ax.set_ylabel('Loss', fontsize=14)
-    ax.set_xlabel('Layers', fontsize=14)
-    ax.legend(loc='best', prop={"size": 9}, ncol=2, framealpha=0.5)
-    [tick.label.set_fontsize(14) for tick in ax.xaxis.get_major_ticks()] 
-    [tick.label.set_fontsize(14) for tick in ax.yaxis.get_major_ticks()]
-    plt.tight_layout()
+        losses = [data['loss_total'].ravel(), data['loss_expd'].ravel(), data['loss_comp'].ravel()]
+        for loss, name, color in zip(losses, names, colors):
+            num_iter = np.arange(loss.size)
+            ax.plot(num_iter, loss, label=r'{} ({})'.format(name, model), 
+                color=color, linewidth=1.5, alpha=alpha, linestyle=linestyle,
+                marker=marker, markersize=markersize, markevery=100, markeredgecolor='black')
+    ax.set_ylabel('Loss', fontsize=40)
+    ax.set_xlabel('Layers', fontsize=40)
+    # ax.set_ylim((-0.05, 2.8)) # gaussian2d
+    # ax.set_yticks(np.linspace(0, 2.5, 6)) # gaussian2d
+    # ax.set_ylim((0, 4.0)) # gaussian3d
+    # ax.set_yticks(np.linspace(0, 4.0, 9)) # gaussian3d
+    # ax.set_ylim((-0.005, 0.075)) # mnist_rotation_classes01
+    # ax.set_yticks(np.linspace(0, 0.075, 6)) # mnist_rotation_classes01
+    ax.set_ylim((-0.015, 0.1)) # sinusoid
+    ax.set_yticks(np.linspace(0, 0.1, 5)) # sinusoid
+    # ax.legend(loc='lower right', prop={"size": 15}, ncol=3, framealpha=0.5)
+    ax.legend(loc='lower right', prop={"size": 13}, ncol=3, framealpha=0.5)
+    [tick.label.set_fontsize(22) for tick in ax.xaxis.get_major_ticks()] 
+    [tick.label.set_fontsize(22) for tick in ax.yaxis.get_major_ticks()]
+    fig.tight_layout()
     
     save_dir = os.path.join(model_dir, 'figures', 'loss')
     os.makedirs(save_dir, exist_ok=True)
@@ -77,6 +93,7 @@ def plot_2d(Z, y, name, model_dir):
     plot_dir = os.path.join(model_dir, "figures", "2dscatter")
     colors = np.array(['green', 'red', 'blue'])
     os.makedirs(plot_dir, exist_ok=True)
+    plt.rc('text', usetex=True)
     plt.rcParams['font.family'] = 'serif'
     plt.rcParams['font.serif'] = ['Times New Roman']
     colors = np.array(['royalblue', 'forestgreen', 'blue'])
@@ -92,8 +109,8 @@ def plot_2d(Z, y, name, model_dir):
     Z, _ = tf.get_n_each(Z, y, 1)
     ax.arrow(0, 0, Z[0, 0], Z[0, 1], head_width=0.03, head_length=0.05, fc='k', ec='k', length_includes_head=True)
     ax.arrow(0, 0, Z[-1, 0], Z[-1, 1], head_width=0.03, head_length=0.05, fc='k', ec='k', length_includes_head=True)
-    [tick.label.set_fontsize(14) for tick in ax.xaxis.get_major_ticks()] 
-    [tick.label.set_fontsize(14) for tick in ax.yaxis.get_major_ticks()]
+    [tick.label.set_fontsize(24) for tick in ax.xaxis.get_major_ticks()] 
+    [tick.label.set_fontsize(24) for tick in ax.yaxis.get_major_ticks()]
     plt.savefig(os.path.join(plot_dir, "scatter2d-"+name+".pdf"), dpi=200)
     plt.close()
 
@@ -113,9 +130,9 @@ def plot_3d(Z, y, name, model_dir):
     ax.quiver(0.0, 0.0, 0.0, Z[0, 0], Z[0, 1], Z[0, 2], length=1.0, normalize=True, arrow_length_ratio=0.05, color='black')
     ax.quiver(0.0, 0.0, 0.0, Z[1, 0], Z[1, 1], Z[1, 2], length=1.0, normalize=True, arrow_length_ratio=0.05, color='black')
     ax.quiver(0.0, 0.0, 0.0, Z[2, 0], Z[2, 1], Z[2, 2], length=1.0, normalize=True, arrow_length_ratio=0.05, color='black')
-    [tick.label.set_fontsize(14) for tick in ax.xaxis.get_major_ticks()] 
-    [tick.label.set_fontsize(14) for tick in ax.yaxis.get_major_ticks()]
-    [tick.label.set_fontsize(14) for tick in ax.zaxis.get_major_ticks()]
+    [tick.label.set_fontsize(24) for tick in ax.xaxis.get_major_ticks()] 
+    [tick.label.set_fontsize(24) for tick in ax.yaxis.get_major_ticks()]
+    [tick.label.set_fontsize(24) for tick in ax.zaxis.get_major_ticks()]
     plt.tight_layout()
     fig.savefig(os.path.join(savedir, f"scatter3d-{name}.pdf"), dpi=200)
     plt.close()
@@ -138,30 +155,30 @@ def plot_nearsub_angle(train_features, train_labels, test_features, test_labels,
     
     colors = ['blue', 'red', 'green']
     classes = np.unique(y_train)
-
     fs_train, _ = utils.sort_dataset(train_features, train_labels, 
                         classes=classes, stack=False)
     fs_test, _ = utils.sort_dataset(test_features, test_labels, 
                             classes=classes, stack=False)
     for class_train in classes:
+        plt.rc('text', usetex=True)
         plt.rcParams['font.family'] = 'serif'
         plt.rcParams['font.serif'] = ['Times New Roman']
-        fig, ax = plt.subplots(figsize=(6, 5), dpi=300)
+        fig, ax = plt.subplots(figsize=(7, 5))
         
         for class_test in classes:
             _bins = np.linspace(-0.05, 1.05, 21)
             residuals = least_square(fs_train[class_train], fs_test[class_test], n_comp)
-
+            print('class_train', class_train, 'class_test', class_test, 'residuals', residuals[:10])
             ax.hist(residuals, bins=_bins, alpha=0.5, color=colors[class_test], 
                     edgecolor='black', label=f'Class {class_test}')
 
-        ax.set_xlabel('Similarity', fontsize=14)
-        ax.set_ylabel('Count', fontsize=14)
-        [tick.label.set_fontsize(14) for tick in ax.xaxis.get_major_ticks()] 
-        [tick.label.set_fontsize(14) for tick in ax.yaxis.get_major_ticks()]
-        ax.legend(loc='upper right', prop={"size": 15}, ncol=1, framealpha=0.5)
+        ax.set_xlabel('Distance', fontsize=22)
+        ax.set_ylabel('Count', fontsize=22)
+        [tick.label.set_fontsize(22) for tick in ax.xaxis.get_major_ticks()] 
+        [tick.label.set_fontsize(22) for tick in ax.yaxis.get_major_ticks()]
+        ax.legend(loc='upper center', prop={"size": 13}, ncol=1, framealpha=0.5)
         fig.tight_layout()
-        fig.savefig(os.path.join(save_dir, f'subspace_angle-dim{n_comp}-{title}-subspace{class_train}{tail}.pdf'))
+        fig.savefig(os.path.join(save_dir, f'subspace_angle-dim{n_comp}-{title}-subspace{class_train}{tail}.pdf'), dpi=200)
         plt.close()
 
 def plot_pca(features, labels, n_comp, title, classes, model_dir):
@@ -259,9 +276,15 @@ if __name__ == "__main__":
             plot_3d(Z_test, y_test, "Z_test", args.model_dir)
 
     if multichannel: # multichannel data
-        X_translate = np.load(os.path.join(args.model_dir, "features", "X_translate_features.npy"))
-        y_translate = np.load(os.path.join(args.model_dir, "features", "X_translate_labels.npy"))
-        Z_translate = np.load(os.path.join(args.model_dir, "features", "Z_translate_features.npy"))
+        # X_translate = np.load(os.path.join(args.model_dir, "features", "X_translate_features.npy"))
+        # y_translate = np.load(os.path.join(args.model_dir, "features", "X_translate_labels.npy"))
+        # Z_translate = np.load(os.path.join(args.model_dir, "features", "Z_translate_features.npy"))
+        X_translate = np.vstack([np.load(os.path.join(args.model_dir, "features", f"X_translate_features-{i}-{i+50}.npy")) for i in range(0, 1000, 50)])
+        y_translate = np.hstack([np.load(os.path.join(args.model_dir, "features", f"y_translate_labels-{i}-{i+50}.npy")) for i in range(0, 1000, 50)])
+        Z_translate = np.vstack([np.load(os.path.join(args.model_dir, "features", f"Z_translate_features-{i}-{i+50}.npy")) for i in range(0, 1000, 50)])
+        # X_translate = np.vstack([np.load(os.path.join(args.model_dir, "features", f"X_translate_features-{i}-{i+25}.npy")) for i in range(0, 100, 25)])
+        # y_translate = np.hstack([np.load(os.path.join(args.model_dir, "features", f"y_translate_labels-{i}-{i+25}.npy")) for i in range(0, 100, 25)])
+        # Z_translate = np.vstack([np.load(os.path.join(args.model_dir, "features", f"Z_translate_features-{i}-{i+25}.npy")) for i in range(0, 100, 25)])
         X_translate = tf.normalize(X_translate.reshape(X_translate.shape[0], -1))
         Z_translate = tf.normalize(Z_translate.reshape(Z_translate.shape[0], -1))
 

@@ -56,7 +56,7 @@ def plot_combined_loss(model_dir):
     markers = ['o', 'D']
     markersizes = [4.5, 3]
     alphas = [0.5, 0.9]
-    names = ['$\Delta R$ ', '$R$', '$R^c$']
+    names = ['$\Delta R$ ', '$R$', '$R_c$']
     colors = ['green', 'royalblue', 'coral']
     for model, linestyle, marker, alpha, markersize in zip(models, linestyles, markers, alphas, markersizes):
         filename = os.path.join(model_dir, "loss", f'{model}.csv')
@@ -71,16 +71,18 @@ def plot_combined_loss(model_dir):
     ax.set_xlabel('Layers', fontsize=40)
     # ax.set_ylim((-0.05, 2.8)) # gaussian2d
     # ax.set_yticks(np.linspace(0, 2.5, 6)) # gaussian2d
-    ax.set_ylim((-0.05, 2.5)) # gaussian2d
-    ax.set_yticks(np.linspace(0, 2.5, 6)) # gaussian2d
-    # ax.set_ylim((0, 4.0)) # gaussian3d
-    # ax.set_yticks(np.linspace(0, 4.0, 9)) # gaussian3d
+    # ax.set_ylim((-0.05, 2.5)) # gaussian2d
+    # ax.set_yticks(np.linspace(0, 2.5, 6)) # gaussian2d
+    ax.set_ylim((0, 4.0)) # gaussian3d
+    ax.set_yticks(np.linspace(0, 4.0, 9)) # gaussian3d
     # ax.set_ylim((-0.005, 0.075)) # mnist_rotation_classes01
     # ax.set_yticks(np.linspace(0, 0.075, 6)) # mnist_rotation_classes01
-    # ax.set_ylim((-0.015, 0.1)) # sinusoid
+    # ax.set_ylim((-0.02, 0.1)) # sinusoid
     # ax.set_yticks(np.linspace(0, 0.1, 5)) # sinusoid
-    # ax.legend(loc='lower right', prop={"size": 15}, ncol=3, framealpha=0.5)
-    ax.legend(loc='lower right', prop={"size": 13}, ncol=3, framealpha=0.5)
+    handles, labels = ax.get_legend_handles_labels()
+    handles = [handles[i] for i in [0, 3, 1, 4, 2, 5]]
+    labels = [labels[i] for i in [0, 3, 1, 4, 2, 5]]
+    ax.legend(handles, labels, loc='lower right', prop={"size": 13}, ncol=3, framealpha=0.5)
     [tick.label.set_fontsize(22) for tick in ax.xaxis.get_major_ticks()] 
     [tick.label.set_fontsize(22) for tick in ax.yaxis.get_major_ticks()]
     fig.tight_layout()
@@ -128,13 +130,20 @@ def plot_3d(Z, y, name, model_dir):
     ax = fig.add_subplot(111, projection='3d')
     ax.scatter(Z[:, 0], Z[:, 1], Z[:, 2], c=colors[y], cmap=plt.cm.Spectral, s=200.0)
     Z, _ = tf.get_n_each(Z, y, 1)
-    ax.scatter(0.0, 0.0, 0.0, c='black', cmap=plt.cm.Spectral, marker='s', s=50.0)
-    ax.quiver(0.0, 0.0, 0.0, Z[0, 0], Z[0, 1], Z[0, 2], length=1.0, normalize=True, arrow_length_ratio=0.05, color='black')
-    ax.quiver(0.0, 0.0, 0.0, Z[1, 0], Z[1, 1], Z[1, 2], length=1.0, normalize=True, arrow_length_ratio=0.05, color='black')
-    ax.quiver(0.0, 0.0, 0.0, Z[2, 0], Z[2, 1], Z[2, 2], length=1.0, normalize=True, arrow_length_ratio=0.05, color='black')
+    for c in np.unique(y):
+        ax.quiver(0.0, 0.0, 0.0, Z[c, 0], Z[c, 1], Z[c, 2], length=1.0, normalize=True, arrow_length_ratio=0.05, color='black')
+    u, v = np.mgrid[0:2*np.pi:20j, 0:np.pi:10j]
+    x = np.cos(u)*np.sin(v)
+    y = np.sin(u)*np.sin(v)
+    z = np.cos(v)
+    ax.plot_wireframe(x, y, z, color="gray", alpha=0.5)
+    ax.xaxis._axinfo["grid"]['color'] =  (0,0,0,0.1)
+    ax.yaxis._axinfo["grid"]['color'] =  (0,0,0,0.1)
+    ax.zaxis._axinfo["grid"]['color'] =  (0,0,0,0.1)
     [tick.label.set_fontsize(24) for tick in ax.xaxis.get_major_ticks()] 
     [tick.label.set_fontsize(24) for tick in ax.yaxis.get_major_ticks()]
     [tick.label.set_fontsize(24) for tick in ax.zaxis.get_major_ticks()]
+    ax.view_init(20, 15)
     plt.tight_layout()
     fig.savefig(os.path.join(savedir, f"scatter3d-{name}.pdf"), dpi=200)
     plt.close()
@@ -239,23 +248,64 @@ def plot_sample_angle(train_features, train_labels, test_features, test_labels, 
                         classes=classes, stack=False)
     fs_test, _ = utils.sort_dataset(test_features, test_labels, 
                             classes=classes, stack=False)
+    angles = []
     for class_train in classes:
         plt.rc('text', usetex=True)
         plt.rcParams['font.family'] = 'serif'
         plt.rcParams['font.serif'] = ['Times New Roman']
         fig, ax = plt.subplots(figsize=(7, 5))
         for class_test in classes:
+            if class_train == class_test:
+                continue
             angles = (fs_train[class_train] @ fs_test[class_test].T).reshape(-1)
-            ax.hist(angles, bins=_bins, alpha=0.5, color=colors[class_test], 
-                    edgecolor='black', label=f'Class {class_test}')
-        ax.set_xlabel('Similarity', fontsize=22)
-        ax.set_ylabel('Count', fontsize=22)
-        [tick.label.set_fontsize(22) for tick in ax.xaxis.get_major_ticks()] 
-        [tick.label.set_fontsize(22) for tick in ax.yaxis.get_major_ticks()]
-        ax.legend(loc='upper center', prop={"size": 13}, ncol=1, framealpha=0.5)
-        fig.tight_layout()
-        fig.savefig(os.path.join(save_dir, f'sample_angle-{title1}{class_train}-vs-{title2}{tail}.pdf'), dpi=200)
-        plt.close()
+            ax.hist(np.hstack(angles), bins=_bins, alpha=0.5, color=colors[class_test], 
+                        edgecolor='black')#, label=f'Class {class_test}')
+            ax.set_xlabel('Similarity', fontsize=38)
+            ax.set_ylabel('Count', fontsize=38)
+            ax.ticklabel_format(style='sci', scilimits=(0, 3))
+            [tick.label.set_fontsize(22) for tick in ax.xaxis.get_major_ticks()] 
+            [tick.label.set_fontsize(22) for tick in ax.yaxis.get_major_ticks()]
+            # ax.legend(loc='upper center', prop={"size": 13}, ncol=1, framealpha=0.5)
+            fig.tight_layout()
+            fig.savefig(os.path.join(save_dir, f'sample_angle-{title1}{class_train}-vs-{title2}{class_test}{tail}.pdf'), dpi=200)
+            plt.close()
+
+def plot_sample_angle_combined(train_features, train_labels, test_features, test_labels, model_dir, title1, title2, tail=""):
+    save_dir = os.path.join(model_dir, "figures", "sample_angle_combined")
+    os.makedirs(save_dir, exist_ok=True)
+    
+    colors = ['blue', 'red', 'green']
+    _bins = np.linspace(-0.05, 1.05, 21)
+
+    classes = np.unique(y_train)
+    fs_train, _ = utils.sort_dataset(train_features, train_labels, 
+                        classes=classes, stack=False)
+    fs_test, _ = utils.sort_dataset(test_features, test_labels, 
+                            classes=classes, stack=False)
+    angles = []
+    for class_train in classes:
+        for class_test in classes:
+            if class_train == class_test:
+                continue
+            angles.append((fs_train[class_train] @ fs_test[class_test].T).reshape(-1))
+
+    plt.rc('text', usetex=True)
+    plt.rcParams['font.family'] = 'serif'
+    plt.rcParams['font.serif'] = ['Times New Roman']
+    fig, ax = plt.subplots(figsize=(7, 5))
+    ax.hist(np.hstack(angles), bins=_bins, alpha=0.5, color=colors[class_test], 
+                edgecolor='black')#, label=f'Class {class_test}')
+    ax.set_xlabel('Similarity', fontsize=38)
+    ax.set_ylabel('Count', fontsize=38)
+    ax.ticklabel_format(style='sci', scilimits=(0, 3))
+    [tick.label.set_fontsize(22) for tick in ax.xaxis.get_major_ticks()] 
+    [tick.label.set_fontsize(22) for tick in ax.yaxis.get_major_ticks()]
+    # ax.legend(loc='upper center', prop={"size": 13}, ncol=1, framealpha=0.5)
+    fig.tight_layout()
+    fig.savefig(os.path.join(save_dir, f'sample_angle_combined-{title1}-vs-{title2}{tail}.pdf'), dpi=200)
+    plt.close()
+
+
 
 def plot_pca(features, labels, n_comp, title, classes, model_dir):
     pca_dir = os.path.join(model_dir, 'figures', 'pca')
@@ -310,6 +360,7 @@ if __name__ == "__main__":
     parser.add_argument('--heatmap', action='store_true', help='plot heatmaps')
     parser.add_argument('--subspace_angle', action='store_true', help='plot angle between subspace and samples')
     parser.add_argument('--sample_angle', action='store_true', help='plot angle between train and test samples')
+    parser.add_argument('--sample_angle_combined', action='store_true', help='plot angle between train and test samples')
     parser.add_argument('--pca', action='store_true', help='plot pca')
     args = parser.parse_args()
 
@@ -356,12 +407,12 @@ if __name__ == "__main__":
         # X_translate = np.load(os.path.join(args.model_dir, "features", "X_translate_features.npy"))
         # y_translate = np.load(os.path.join(args.model_dir, "features", "X_translate_labels.npy"))
         # Z_translate = np.load(os.path.join(args.model_dir, "features", "Z_translate_features.npy"))
-        X_translate = np.vstack([np.load(os.path.join(args.model_dir, "features", f"X_translate_features-{i}-{i+50}.npy")) for i in range(0, 1000, 50)])
-        y_translate = np.hstack([np.load(os.path.join(args.model_dir, "features", f"y_translate_labels-{i}-{i+50}.npy")) for i in range(0, 1000, 50)])
-        Z_translate = np.vstack([np.load(os.path.join(args.model_dir, "features", f"Z_translate_features-{i}-{i+50}.npy")) for i in range(0, 1000, 50)])
-        # X_translate = np.vstack([np.load(os.path.join(args.model_dir, "features", f"X_translate_features-{i}-{i+25}.npy")) for i in range(0, 100, 25)])
-        # y_translate = np.hstack([np.load(os.path.join(args.model_dir, "features", f"y_translate_labels-{i}-{i+25}.npy")) for i in range(0, 100, 25)])
-        # Z_translate = np.vstack([np.load(os.path.join(args.model_dir, "features", f"Z_translate_features-{i}-{i+25}.npy")) for i in range(0, 100, 25)])
+        # X_translate = np.vstack([np.load(os.path.join(args.model_dir, "features", f"X_translate_features-{i}-{i+50}.npy")) for i in range(0, 1000, 50)])
+        # y_translate = np.hstack([np.load(os.path.join(args.model_dir, "features", f"y_translate_labels-{i}-{i+50}.npy")) for i in range(0, 1000, 50)])
+        # Z_translate = np.vstack([np.load(os.path.join(args.model_dir, "features", f"Z_translate_features-{i}-{i+50}.npy")) for i in range(0, 1000, 50)])
+        X_translate = np.vstack([np.load(os.path.join(args.model_dir, "features", f"X_translate_features-{i}-{i+25}.npy")) for i in range(0, 100, 25)])
+        y_translate = np.hstack([np.load(os.path.join(args.model_dir, "features", f"y_translate_labels-{i}-{i+25}.npy")) for i in range(0, 100, 25)])
+        Z_translate = np.vstack([np.load(os.path.join(args.model_dir, "features", f"Z_translate_features-{i}-{i+25}.npy")) for i in range(0, 100, 25)])
         X_translate = tf.normalize(X_translate.reshape(X_translate.shape[0], -1))
         Z_translate = tf.normalize(Z_translate.reshape(Z_translate.shape[0], -1))
 
@@ -383,7 +434,8 @@ if __name__ == "__main__":
             plot_sample_angle(Z_train, y_train, Z_test, y_test, args.model_dir, "Z-train", "test", args.tail)
             plot_sample_angle(Z_train, y_train, Z_translate, y_translate, args.model_dir, "Z-train", "translate", args.tail)
 
-            plot_sample_angle(X_test, y_test, X_test, y_test, args.model_dir, "X-test", "test", args.tail)
-            plot_sample_angle(X_test, y_test, X_translate, y_translate, args.model_dir, "X-test", "translate", args.tail)
-            plot_sample_angle(Z_test, y_test, Z_test, y_test, args.model_dir, "Z-test", "test", args.tail)
-            plot_sample_angle(Z_test, y_test, Z_translate, y_translate, args.model_dir, "Z-test", "translate", args.tail)
+        if args.sample_angle_combined:
+            plot_sample_angle_combined(X_train, y_train, X_test, y_test, args.model_dir, "X-train", "test", args.tail)
+            plot_sample_angle_combined(X_train, y_train, X_translate, y_translate, args.model_dir, "X-train", "translate", args.tail)
+            plot_sample_angle_combined(Z_train, y_train, Z_test, y_test, args.model_dir, "Z-train", "test", args.tail)
+            plot_sample_angle_combined(Z_train, y_train, Z_translate, y_translate, args.model_dir, "Z-train", "translate", args.tail)

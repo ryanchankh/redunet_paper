@@ -4,7 +4,6 @@ import matplotlib.pyplot as plt
 import pandas as pd
 from scipy.stats import norm
 import scipy.ndimage
-from sklearn.preprocessing import normalize
 
 from sklearn.model_selection import train_test_split
 from sklearn.datasets import make_s_curve
@@ -12,6 +11,8 @@ from sklearn.datasets import make_s_curve
 import torch
 from torch.utils.data import Dataset
 from torchvision.datasets import MNIST
+
+import train_func as tf
 
 def generate_wave(time, 
                   samples, 
@@ -69,13 +70,13 @@ def generate_wave(time,
         labels = np.hstack([np.ones(samples) * 0, 
                             np.ones(samples) * 1]).astype(np.int32)
         num_classes = 2
-    elif mode == 6: # noiseless 4 classes sign vs sin
+    elif mode == 6: # 4 classes sign vs sin with 0.1
         x0 = np.random.uniform(low=0, high=10*np.pi, size=samples)
         x1 = np.linspace(x0, x0+2*np.pi, time).T
-        y1 = np.sin(x1 * 1)
-        y2 = np.sign(np.sin(x1 * 1))
-        y3 = np.sin(x1 * 3)
-        y4 = np.sign(np.sin(x1 * 3))
+        y1 = np.sin(x1 * 1) + np.random.normal(loc=0, scale=0.1, size=(samples, time))
+        y2 = np.sign(np.sin(x1 * 1)) + np.random.normal(loc=0, scale=0.1, size=(samples, time))
+        y3 = np.sin(x1 * 3) + + np.random.normal(loc=0, scale=0.1, size=(samples, time))
+        y4 = np.sign(np.sin(x1 * 3)) + + np.random.normal(loc=0, scale=0.1, size=(samples, time))
         data = np.vstack([y1, y2, y3, y4])
         labels = np.hstack([np.ones(samples) * 0, 
                             np.ones(samples) * 1,
@@ -153,7 +154,7 @@ def generate_2d(data, noise, samples, shuffle=False):
         data.append(X)
         targets += y
     data = np.concatenate(data)
-    data = normalize(data, axis=1)
+    data = tf.normalize(data)
     targets = np.array(targets)
 
     if shuffle:
@@ -163,59 +164,35 @@ def generate_2d(data, noise, samples, shuffle=False):
     return data, targets, len(centers)
 
 def generate_3d(data, noise, samples, shuffle=False):
-    if data == 1: # 2 curves on sphere
-        theta1 = np.random.uniform(np.pi / 4,  -np.pi / 4, samples)
-        x1 = np.cos(theta1)
-        y1 = np.sin(5*theta1)
-        z1 = np.sin(5*theta1)*x1 + 1.0
-        X1 = np.stack([x1, y1, z1]).T
-        X1 = normalize(X1, axis=1)
-        Y1 = np.ones(samples) * 0
-        theta2 = np.random.uniform(np.pi / 4,  -np.pi / 4, samples)
-        x2 = np.sin(2*theta2)
-        y2 = np.cos(2*theta2) + 1.0
-        z2 = np.cos(2*theta2) * x2
-        X2 = np.stack([x2, y2, z2]).T
-        X2 = normalize(X2, axis=1)
-        Y2 = np.ones(samples) * 1
-
-        data = np.vstack([X1, X2])
-        targets = np.hstack([Y1, Y2])
-        num_classes = 2
-
-    elif data == 2:  # 3 polar 
-        x1 = np.random.normal(loc=0, scale=noise, size=samples)
-        y1 = np.random.normal(loc=0, scale=noise, size=samples)
-        z1 = np.ones(samples)
-        X1 = np.stack([x1, y1, z1]).T
-        X1 = normalize(X1, axis=1)
-        Y1 = np.ones(samples) * 0
-
-        x2 = np.random.normal(loc=0, scale=noise, size=samples)
-        y2 = np.ones(samples)
-        z2 = np.random.normal(loc=0, scale=noise, size=samples)
-        X2 = np.stack([x2, y2, z2]).T
-        X2 = normalize(X2, axis=1)
-        Y2 = np.ones(samples) * 1
-
-        x3 = np.ones(samples)
-        y3 = np.random.normal(loc=0, scale=noise, size=samples)
-        z3 = np.random.normal(loc=0, scale=noise, size=samples)
-        X3 = np.stack([x3, y3, z3]).T
-        X3 = normalize(X3, axis=1)
-        Y3 = np.ones(samples) * 2
-
-        data = np.vstack([X1, X2, X3])
-        targets = np.hstack([Y1, Y2, Y3])
-        num_classes = 3
+    if data == 1:
+        centers = [(1, 0, 0), 
+                   (0, 1, 0), 
+                   (0, 0, 1)]
+    elif data == 2:
+        centers = [(np.cos(np.pi/4), np.sin(np.pi/4), 1),
+                   (np.cos(2*np.pi/3), np.sin(2*np.pi/3), 1),
+                   (np.cos(np.pi), np.sin(np.pi), 1)]
+    elif data == 3:
+        centers = [(np.cos(np.pi/4), np.sin(np.pi/4), 1),
+                   (np.cos(2*np.pi/3), np.sin(2*np.pi/3), 1),
+                   (np.cos(5*np.pi/6), np.cos(5*np.pi/6), 1)]
     else:
-        raise NameError('Class not found.')
+        raise NameError('Data not found.')
 
+    X, Y = [], []
+    for c, center in enumerate(centers):
+        _X = np.random.normal(center, scale=(noise, noise, noise), size=(samples, 3))
+        _Y = np.ones(samples, dtype=np.int32) * c
+        X.append(_X)
+        Y.append(_Y)
+    X = tf.normalize(np.vstack(X))
+    Y = np.hstack(Y)
+    
     if shuffle:
-        idx_arr = np.random.choice(np.arange(len(data)), len(data), replace=False)
-        data, targets = data[idx_arr], targets[idx_arr]
+        idx_arr = np.random.choice(np.arange(len(X)), len(X), replace=False)
+        X, Y = X[idx_arr], Y[idx_arr]
 
-    return data.astype(np.float32), targets.astype(np.int32), num_classes
+    return X.astype(np.float32), Y.astype(np.int32), 3
 
 
 def load_MNIST_polar(root, samples, channels, time, train=True):

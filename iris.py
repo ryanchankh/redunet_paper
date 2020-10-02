@@ -39,7 +39,7 @@ utils.save_params(model_dir, vars(args))
 
 # data setup
 X, y = load_iris(return_X_y=True)
-X_train, X_test, y_train, y_test = train_test_split(X, y, shuffle=True, test_size=0.35)
+X_train, X_test, y_train, y_test = train_test_split(X, y, shuffle=True, test_size=0.3)
 X_train = tf.normalize(X_train)
 X_test = tf.normalize(X_test)
 num_classes = 3

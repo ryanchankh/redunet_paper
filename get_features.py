@@ -4,7 +4,8 @@ import numpy as np
 from arch import (
     Architecture,
     Lift1D,
-    Fourier1D
+    Fourier1D,
+    Vector
 )
 import dataset
 import train_func as tf
@@ -13,7 +14,8 @@ import plot
 
 
 
-model_dir = "./saved_models/mnist_rotation-classes01/samples1000_layers3500_eps0.1_eta0.5/"
+# model_dir = "./saved_models/mnist_rotation-classes01/samples1000_layers3500_eps0.1_eta0.5/"
+model_dir = "./saved_models/mnist_rotation-vector-classes01/samples500_layers1500_eps0.1_eta0.1"
 m = 500  # samples each class
 bs = 20 # batch size
 stride = 5
@@ -23,10 +25,13 @@ classes = np.array(params['classes'])
 
 X_train = np.load(os.path.join(model_dir, "features", "X_train_features.npy"))
 y_train = np.load(os.path.join(model_dir, "features", "X_train_labels.npy"))
-X_test = np.load(os.path.join(model_dir, "features", "X_test_features.npy"))
-y_test = np.load(os.path.join(model_dir, "features", "X_test_labels.npy"))
+# X_test = np.load(os.path.join(model_dir, "features", "X_test_features.npy"))
+# y_test = np.load(os.path.join(model_dir, "features", "X_test_labels.npy"))
+X_test = np.load('./data/mnist_rotation/mnist_X_test_C5_T200.npy')
+y_test = np.load('./data/mnist_rotation/mnist_y_test_C5_T200.npy')
 
-layers = [Fourier1D(200, eta=params['eta'], eps=params['eps'], lmbda=params['lmbda'])]
+# layers = [Fourier1D(200, eta=params['eta'], eps=params['eps'], lmbda=params['lmbda'])]
+layers = [Vector(params['layers'], eta=params['eta'], eps=params['eps'], lmbda=params['lmbda'])]
 model = Architecture(layers, model_dir, classes.size)
 
 model.blocks[0].num_classes = model.num_classes 
@@ -38,6 +43,7 @@ for batch_idx in range(0, m * classes.size, bs):
     y_batch = y_test_filter[batch_idx:batch_idx+bs]
 
     X_translate, y_translate = tf.translate_all(X_batch, y_batch, stride=stride)
+    X_translate = tf.normalize(X_translate.reshape(X_translate.shape[0], -1))
     Z_translate = model(X_translate).real
 
     np.save(os.path.join(model_dir, "features", f"X_translate_features-{batch_idx}-{batch_idx+bs}"), X_translate)

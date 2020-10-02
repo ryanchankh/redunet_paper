@@ -73,8 +73,8 @@ def plot_combined_loss(model_dir):
     # ax.set_yticks(np.linspace(0, 2.5, 6)) # gaussian2d
     # ax.set_ylim((-0.05, 2.5)) # gaussian2d
     # ax.set_yticks(np.linspace(0, 2.5, 6)) # gaussian2d
-    ax.set_ylim((0, 4.0)) # gaussian3d
-    ax.set_yticks(np.linspace(0, 4.0, 9)) # gaussian3d
+    # ax.set_ylim((0, 4.0)) # gaussian3d
+    # ax.set_yticks(np.linspace(0, 4.0, 9)) # gaussian3d
     # ax.set_ylim((-0.005, 0.075)) # mnist_rotation_classes01
     # ax.set_yticks(np.linspace(0, 0.075, 6)) # mnist_rotation_classes01
     # ax.set_ylim((-0.02, 0.1)) # sinusoid
@@ -95,12 +95,12 @@ def plot_combined_loss(model_dir):
 
 def plot_2d(Z, y, name, model_dir):
     plot_dir = os.path.join(model_dir, "figures", "2dscatter")
-    colors = np.array(['green', 'red', 'blue'])
+    colors = np.array(['forestgreen', 'red', 'royalblue', 'purple', 'darkblue', 'orange'])
     os.makedirs(plot_dir, exist_ok=True)
     plt.rc('text', usetex=True)
     plt.rcParams['font.family'] = 'serif'
     plt.rcParams['font.serif'] = ['Times New Roman']
-    colors = np.array(['royalblue', 'forestgreen', 'blue'])
+    # colors = np.array(['royalblue', 'forestgreen', 'red'])
     fig, ax = plt.subplots(figsize=(6, 5), dpi=200)
     ax.scatter(Z[:, 0], Z[:, 1], c=colors[y], alpha=0.5)
     ax.scatter(0.0, 0.0, c='black', alpha=0.8, marker='s')
@@ -111,8 +111,8 @@ def plot_2d(Z, y, name, model_dir):
     ax.set_yticks([-1.0, -0.5, 0.0, 0.5, 1.0])
     ax.grid(linestyle=':')
     Z, _ = tf.get_n_each(Z, y, 1)
-    ax.arrow(0, 0, Z[0, 0], Z[0, 1], head_width=0.03, head_length=0.05, fc='k', ec='k', length_includes_head=True)
-    ax.arrow(0, 0, Z[-1, 0], Z[-1, 1], head_width=0.03, head_length=0.05, fc='k', ec='k', length_includes_head=True)
+    for c in np.unique(y):
+        ax.arrow(0, 0, Z[c, 0], Z[c, 1], head_width=0.03, head_length=0.05, fc='k', ec='k', length_includes_head=True)
     [tick.label.set_fontsize(24) for tick in ax.xaxis.get_major_ticks()] 
     [tick.label.set_fontsize(24) for tick in ax.yaxis.get_major_ticks()]
     plt.savefig(os.path.join(plot_dir, "scatter2d-"+name+".pdf"), dpi=200)

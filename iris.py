@@ -22,9 +22,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--layers', type=int, help="number of layers")
 parser.add_argument('--eta', type=float, help='learning rate')
 parser.add_argument('--eps', type=float, help='eps squared')
-parser.add_argument('--noise', type=float, help='noise')
 parser.add_argument('--lmbda', type=float, default=5000, help='lambda')
-parser.add_argument('--data', type=int, help='choice of distributions for data')
 parser.add_argument('--tail', type=str, default='',
                     help='extra information to add to folder name')
 parser.add_argument('--save_dir', type=str, default='./saved_models/',

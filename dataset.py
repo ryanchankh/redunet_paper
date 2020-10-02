@@ -101,6 +101,17 @@ def generate_wave(time,
         labels = np.hstack([np.ones(samples) * 0, 
                             np.ones(samples) * 1]).astype(np.int32)
         num_classes = 2
+    elif mode == 9:
+        x0 = np.random.uniform(low=0, high=10*np.pi, size=samples)
+        x1 = np.linspace(x0, x0+2*np.pi, time).T
+        f1 = np.sin(x1) + np.random.normal(loc=0, scale=0.1, size=(samples, time))
+        f2 = np.e**(np.sin(x1)) + np.random.normal(loc=0, scale=0.1, size=(samples, time))
+        f3 = np.sign(np.sin(x1)) + np.random.normal(loc=0, scale=0.1, size=(samples, time))
+        data = np.vstack([f1, f2, f3])
+        labels = np.hstack([np.ones(samples) * 0, 
+                            np.ones(samples) * 1,
+                            np.ones(samples) * 2]).astype(np.int32)
+        num_classes = 3
     else:
         raise NameError("Dataset not found.")
     if shuffle:
@@ -143,8 +154,21 @@ def generate_2d(data, noise, samples, shuffle=False):
         centers = [(np.cos(3*np.pi/4), np.sin(3*np.pi/4)), (1 ,0)]
     elif data == 5:
         centers = [(np.cos(2*np.pi/3), np.sin(2*np.pi/3)), (1 ,0)]
+    elif data == 6:
+        centers = [(np.cos(3*np.pi/4), np.sin(3*np.pi/4)), (np.cos(4*np.pi/3), np.sin(4*np.pi/3)), (1 ,0)]
+    elif data == 7:
+        centers = [(np.cos(3*np.pi/4), np.sin(3*np.pi/4)), 
+                   (np.cos(4*np.pi/3), np.sin(4*np.pi/3)), 
+                   (np.cos(np.pi/4), np.sin(np.pi/4))]
+    elif data == 8:
+        centers = [(np.cos(np.pi/6), np.sin(np.pi/6)), 
+                   (np.cos(np.pi/2), np.sin(np.pi/2)), 
+                   (np.cos(3*np.pi/4), np.sin(3*np.pi/4)),
+                   (np.cos(5*np.pi/4), np.sin(5*np.pi/4)),
+                   (np.cos(7*np.pi/4), np.sin(7*np.pi/4)),
+                   (np.cos(3*np.pi/2), np.sin(3*np.pi/2))]
     else:
-        raise NameErorr('data not found.')
+        raise NameError('data not found.')
 
     data = []
     targets = []

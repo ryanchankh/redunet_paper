@@ -1,0 +1,9 @@
+python3 mice.py --layers 1000 --eps 0.1 --eta 0.5 
+python3 mice.py --layers 1000 --eps 0.5 --eta 0.5 
+python3 mice.py --layers 1000 --eps 1.0 --eta 0.5 
+python3 mice.py --layers 1000 --eps 0.1 --eta 0.1
+python3 mice.py --layers 1000 --eps 0.5 --eta 0.1
+python3 mice.py --layers 1000 --eps 1.0 --eta 0.1
+python3 mice.py --layers 1000 --eps 0.1 --eta 1.0 
+python3 mice.py --layers 1000 --eps 0.5 --eta 1.0 
+python3 mice.py --layers 1000 --eps 1.0 --eta 1.0 

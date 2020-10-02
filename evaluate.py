@@ -10,6 +10,10 @@ from torch.utils.data import DataLoader
 from sklearn.svm import LinearSVC
 from sklearn.decomposition import PCA
 from sklearn.decomposition import TruncatedSVD
+from sklearn.linear_model import SGDClassifier
+from sklearn.svm import LinearSVC, SVC
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.ensemble import RandomForestClassifier
 
 import dataset
 # from arch import FullyConnected
@@ -116,6 +120,18 @@ def compute_accuracy(y_pred, y_true):
     assert y_pred.shape == y_true.shape
     return 1 - np.count_nonzero(y_pred - y_true) / y_true.size
 
+def baseline(train_features, train_labels, test_features, test_labels):
+    test_models = {'log_l2': SGDClassifier(loss='log', max_iter=10000, random_state=42),
+                   'SVM_linear': LinearSVC(max_iter=10000, random_state=42),
+                   'SVM_RBF': SVC(kernel='rbf', random_state=42),
+                   'DecisionTree': DecisionTreeClassifier(),
+                   'RandomForrest': RandomForestClassifier()}
+    for model_name in test_models:
+        test_model = test_models[model_name]
+        test_model.fit(train_features, train_labels)
+        score = test_model.score(test_features, test_labels)
+        print(f"{model_name}: {score}")
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -140,24 +156,36 @@ if __name__ == "__main__":
     Z_train = tf.normalize(Z_train.reshape(Z_train.shape[0], -1))
     Z_test = tf.normalize(Z_test.reshape(Z_test.shape[0], -1))
 
+    print("Train vs Test - Evaluation")
     _, acc_svm = svm(Z_train, y_train, Z_test, y_test)
     acc_knn = knn(Z_train, y_train, Z_test, y_test, k=args.k)
     acc_svd = nearsub(Z_train, y_train, Z_test, y_test, n_comp=args.n_comp)
     acc = {"svm": acc_svm, "knn": acc_knn, "nearsub-svd": acc_svd} 
     utils.save_params(args.model_dir, acc, name="acc_test.json")
 
-    if multichannel: # multichannel data
-        X_translate = np.load(os.path.join(args.model_dir, "features", "X_translate_features.npy"))
-        y_translate = np.load(os.path.join(args.model_dir, "features", "X_translate_labels.npy"))
-        Z_translate = np.load(os.path.join(args.model_dir, "features", "Z_translate_features.npy"))
+    print("Train vs Test - Baseline")
+    baseline(X_train, y_train, X_test, y_test)
+
+    if True: # multichannel data
+        # X_translate = np.load(os.path.join(args.model_dir, "features", "X_translate_features.npy"))
+        # y_translate = np.load(os.path.join(args.model_dir, "features", "X_translate_labels.npy"))
+        # Z_translate = np.load(os.path.join(args.model_dir, "features", "Z_translate_features.npy"))
+
+        X_translate = np.vstack([np.load(os.path.join(args.model_dir, "features", f"X_translate_features-{i}-{i+50}.npy")) for i in range(0, 1000, 50)])
+        y_translate = np.hstack([np.load(os.path.join(args.model_dir, "features", f"y_translate_labels-{i}-{i+50}.npy")) for i in range(0, 1000, 50)])
+        Z_translate = np.vstack([np.load(os.path.join(args.model_dir, "features", f"Z_translate_features-{i}-{i+50}.npy")) for i in range(0, 1000, 50)])
         X_translate = tf.normalize(X_translate.reshape(X_translate.shape[0], -1))
         Z_translate = tf.normalize(Z_translate.reshape(Z_translate.shape[0], -1))
 
+        print("Train vs Translate - Evaluation")
         _, acc_svm = svm(Z_train, y_train, Z_translate, y_translate)
         acc_knn = knn(Z_train, y_train, Z_translate, y_translate, k=args.k)
         acc_svd = nearsub(Z_train, y_train, Z_translate, y_translate, n_comp=args.n_comp)
         acc = {"svm": acc_svm, "knn": acc_knn, "nearsub-svd": acc_svd} 
         utils.save_params(args.model_dir, acc, name="acc_translate.json")
+
+        print("Train vs Translate - Baseline")
+        baseline(X_train, y_train, X_translate, y_translate)
 
 
 

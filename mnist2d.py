@@ -6,11 +6,11 @@ import matplotlib.pyplot as plt
 from torchvision.datasets import MNIST
 
 
-from arch import Architecture, Lift2D, Fourier2D
+from redunet import Architecture, Lift2D, Fourier2D
 import dataset
 import evaluate
 import plot
-import train_func as tf
+import functionals as F
 import utils
 
 
@@ -44,11 +44,11 @@ X_train = np.expand_dims(X_train, 1)
 testset = MNIST("./data/mnist/", train=False, download=True)
 X_test, y_test = testset.data, testset.targets
 X_test = np.expand_dims(X_test, 1)
-X_train, y_train = tf.filter_class(X_train, y_train, args.classes, args.samples)
-X_train, y_train = tf.shuffle(X_train, y_train)
-X_test, y_test = tf.filter_class(X_test, y_test, args.classes, args.samples)
-X_each, y_each = tf.get_n_each(X_test, y_test, 5)
-X_translate, y_translate = tf.translate2d(X_each, y_each, stride=5)
+X_train, y_train = F.filter_class(X_train, y_train, args.classes, args.samples)
+X_train, y_train = F.shuffle(X_train, y_train)
+X_test, y_test = F.filter_class(X_test, y_test, args.classes, args.samples)
+X_each, y_each = F.get_n_each(X_test, y_test, 5)
+X_translate, y_translate = F.translate2d(X_each, y_each, stride=5)
 
 # setup architecture
 kernels = np.random.normal(0, 1, size=(5, 1, 3, 3))
@@ -74,12 +74,12 @@ utils.save_features(model_dir, "Z_train", Z_train, y_train)
 utils.save_features(model_dir, "Z_test", Z_test, y_test)
 utils.save_features(model_dir, "Z_translate", Z_translate, y_translate)
 
-X_train = tf.normalize(X_train.reshape(X_train.shape[0], -1))
-X_test = tf.normalize(X_test.reshape(X_test.shape[0], -1))
-X_translate = tf.normalize(X_translate.reshape(X_translate.shape[0], -1))
-Z_train = tf.normalize(Z_train.reshape(Z_train.shape[0], -1))
-Z_test = tf.normalize(Z_test.reshape(Z_test.shape[0], -1))
-Z_translate = tf.normalize(Z_translate.reshape(Z_translate.shape[0], -1))
+X_train = F.normalize(X_train.reshape(X_train.shape[0], -1))
+X_test = F.normalize(X_test.reshape(X_test.shape[0], -1))
+X_translate = F.normalize(X_translate.reshape(X_translate.shape[0], -1))
+Z_train = F.normalize(Z_train.reshape(Z_train.shape[0], -1))
+Z_test = F.normalize(Z_test.reshape(Z_test.shape[0], -1))
+Z_translate = F.normalize(Z_translate.reshape(Z_translate.shape[0], -1))
 
 # evaluation test
 _, acc_svm = evaluate.svm(Z_train, y_train, Z_test, y_test)

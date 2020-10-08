@@ -7,7 +7,7 @@ from torch.nn.functional import normalize
 from mpl_toolkits.mplot3d import Axes3D
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 from sklearn.decomposition import TruncatedSVD, PCA
-import train_func as tf
+import functionals as F
 import utils
 
 
@@ -110,7 +110,7 @@ def plot_2d(Z, y, name, model_dir):
     ax.set_xticks([-1.0, -0.5, 0.0, 0.5, 1.0])
     ax.set_yticks([-1.0, -0.5, 0.0, 0.5, 1.0])
     ax.grid(linestyle=':')
-    Z, _ = tf.get_n_each(Z, y, 1)
+    Z, _ = F.get_n_each(Z, y, 1)
     for c in np.unique(y):
         ax.arrow(0, 0, Z[c, 0], Z[c, 1], head_width=0.03, head_length=0.05, fc='k', ec='k', length_includes_head=True)
     [tick.label.set_fontsize(24) for tick in ax.xaxis.get_major_ticks()] 
@@ -129,7 +129,7 @@ def plot_3d(Z, y, name, model_dir):
     fig = plt.figure(figsize=(10, 10))
     ax = fig.add_subplot(111, projection='3d')
     ax.scatter(Z[:, 0], Z[:, 1], Z[:, 2], c=colors[y], cmap=plt.cm.Spectral, s=200.0)
-    Z, _ = tf.get_n_each(Z, y, 1)
+    Z, _ = F.get_n_each(Z, y, 1)
     for c in np.unique(y):
         ax.quiver(0.0, 0.0, 0.0, Z[c, 0], Z[c, 1], Z[c, 2], length=1.0, normalize=True, arrow_length_ratio=0.05, color='black')
     u, v = np.mgrid[0:2*np.pi:20j, 0:np.pi:10j]
@@ -375,10 +375,10 @@ if __name__ == "__main__":
 
     classes = np.unique(y_train)
     multichannel = len(X_train.shape) > 2
-    X_train = tf.normalize(X_train.reshape(X_train.shape[0], -1))
-    X_test = tf.normalize(X_test.reshape(X_test.shape[0], -1))
-    Z_train = tf.normalize(Z_train.reshape(Z_train.shape[0], -1))
-    Z_test = tf.normalize(Z_test.reshape(Z_test.shape[0], -1))
+    X_train = F.normalize(X_train.reshape(X_train.shape[0], -1))
+    X_test = F.normalize(X_test.reshape(X_test.shape[0], -1))
+    Z_train = F.normalize(Z_train.reshape(Z_train.shape[0], -1))
+    Z_test = F.normalize(Z_test.reshape(Z_test.shape[0], -1))
 
     # plot
     if args.loss:
@@ -404,17 +404,17 @@ if __name__ == "__main__":
             plot_3d(Z_test, y_test, "Z_test", args.model_dir)
 
     if multichannel: # multichannel data
-        # X_translate = np.load(os.path.join(args.model_dir, "features", "X_translate_features.npy"))
-        # y_translate = np.load(os.path.join(args.model_dir, "features", "X_translate_labels.npy"))
-        # Z_translate = np.load(os.path.join(args.model_dir, "features", "Z_translate_features.npy"))
+        X_translate = np.load(os.path.join(args.model_dir, "features", "X_translate_features.npy"))
+        y_translate = np.load(os.path.join(args.model_dir, "features", "X_translate_labels.npy"))
+        Z_translate = np.load(os.path.join(args.model_dir, "features", "Z_translate_features.npy"))
         # X_translate = np.vstack([np.load(os.path.join(args.model_dir, "features", f"X_translate_features-{i}-{i+50}.npy")) for i in range(0, 1000, 50)])
         # y_translate = np.hstack([np.load(os.path.join(args.model_dir, "features", f"y_translate_labels-{i}-{i+50}.npy")) for i in range(0, 1000, 50)])
         # Z_translate = np.vstack([np.load(os.path.join(args.model_dir, "features", f"Z_translate_features-{i}-{i+50}.npy")) for i in range(0, 1000, 50)])
-        X_translate = np.vstack([np.load(os.path.join(args.model_dir, "features", f"X_translate_features-{i}-{i+25}.npy")) for i in range(0, 100, 25)])
-        y_translate = np.hstack([np.load(os.path.join(args.model_dir, "features", f"y_translate_labels-{i}-{i+25}.npy")) for i in range(0, 100, 25)])
-        Z_translate = np.vstack([np.load(os.path.join(args.model_dir, "features", f"Z_translate_features-{i}-{i+25}.npy")) for i in range(0, 100, 25)])
-        X_translate = tf.normalize(X_translate.reshape(X_translate.shape[0], -1))
-        Z_translate = tf.normalize(Z_translate.reshape(Z_translate.shape[0], -1))
+#        X_translate = np.vstack([np.load(os.path.join(args.model_dir, "features", f"X_translate_features-{i}-{i+25}.npy")) for i in range(0, 100, 25)])
+#        y_translate = np.hstack([np.load(os.path.join(args.model_dir, "features", f"y_translate_labels-{i}-{i+25}.npy")) for i in range(0, 100, 25)])
+#        Z_translate = np.vstack([np.load(os.path.join(args.model_dir, "features", f"Z_translate_features-{i}-{i+25}.npy")) for i in range(0, 100, 25)])
+        X_translate = F.normalize(X_translate.reshape(X_translate.shape[0], -1))
+        Z_translate = F.normalize(Z_translate.reshape(Z_translate.shape[0], -1))
 
         if args.heatmap:
             plot_heatmap(X_translate, y_translate, "X_translate", args.model_dir)

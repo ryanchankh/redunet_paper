@@ -2,7 +2,6 @@ import os
 import numpy as np
 from scipy.special import softmax
 
-import train_func as tf
 
 class Architecture:
     def __init__(self, blocks, model_dir, num_classes, batch_size=1000, save_loss=True, save_layers=[]):

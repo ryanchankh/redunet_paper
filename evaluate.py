@@ -3,9 +3,6 @@ import os
 
 import torch
 import numpy as np
-import torchvision.transforms as transforms
-import torchvision.datasets as datasets
-from torch.utils.data import DataLoader
 
 from sklearn.svm import LinearSVC
 from sklearn.decomposition import PCA
@@ -16,9 +13,7 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import RandomForestClassifier
 
 import dataset
-# from arch import FullyConnected
-import dataset
-import train_func as tf
+import functionals as F
 import utils
 
 
@@ -151,10 +146,10 @@ if __name__ == "__main__":
 
     classes = params['classes']
     multichannel = len(X_train.shape) > 2
-    X_train = tf.normalize(X_train.reshape(X_train.shape[0], -1))
-    X_test = tf.normalize(X_test.reshape(X_test.shape[0], -1))
-    Z_train = tf.normalize(Z_train.reshape(Z_train.shape[0], -1))
-    Z_test = tf.normalize(Z_test.reshape(Z_test.shape[0], -1))
+    X_train = F.normalize(X_train.reshape(X_train.shape[0], -1))
+    X_test = F.normalize(X_test.reshape(X_test.shape[0], -1))
+    Z_train = F.normalize(Z_train.reshape(Z_train.shape[0], -1))
+    Z_test = F.normalize(Z_test.reshape(Z_test.shape[0], -1))
 
     print("Train vs Test - Evaluation")
     _, acc_svm = svm(Z_train, y_train, Z_test, y_test)
@@ -167,15 +162,15 @@ if __name__ == "__main__":
     baseline(X_train, y_train, X_test, y_test)
 
     if True: # multichannel data
-        # X_translate = np.load(os.path.join(args.model_dir, "features", "X_translate_features.npy"))
-        # y_translate = np.load(os.path.join(args.model_dir, "features", "X_translate_labels.npy"))
-        # Z_translate = np.load(os.path.join(args.model_dir, "features", "Z_translate_features.npy"))
+        X_translate = np.load(os.path.join(args.model_dir, "features", "X_translate_features.npy"))
+        y_translate = np.load(os.path.join(args.model_dir, "features", "X_translate_labels.npy"))
+        Z_translate = np.load(os.path.join(args.model_dir, "features", "Z_translate_features.npy"))
 
-        X_translate = np.vstack([np.load(os.path.join(args.model_dir, "features", f"X_translate_features-{i}-{i+50}.npy")) for i in range(0, 1000, 50)])
-        y_translate = np.hstack([np.load(os.path.join(args.model_dir, "features", f"y_translate_labels-{i}-{i+50}.npy")) for i in range(0, 1000, 50)])
-        Z_translate = np.vstack([np.load(os.path.join(args.model_dir, "features", f"Z_translate_features-{i}-{i+50}.npy")) for i in range(0, 1000, 50)])
-        X_translate = tf.normalize(X_translate.reshape(X_translate.shape[0], -1))
-        Z_translate = tf.normalize(Z_translate.reshape(Z_translate.shape[0], -1))
+#        X_translate = np.vstack([np.load(os.path.join(args.model_dir, "features", f"X_translate_features-{i}-{i+50}.npy")) for i in range(0, 1000, 50)])
+#        y_translate = np.hstack([np.load(os.path.join(args.model_dir, "features", f"y_translate_labels-{i}-{i+50}.npy")) for i in range(0, 1000, 50)])
+#        Z_translate = np.vstack([np.load(os.path.join(args.model_dir, "features", f"Z_translate_features-{i}-{i+50}.npy")) for i in range(0, 1000, 50)])
+        X_translate = F.normalize(X_translate.reshape(X_translate.shape[0], -1))
+        Z_translate = F.normalize(Z_translate.reshape(Z_translate.shape[0], -1))
 
         print("Train vs Translate - Evaluation")
         _, acc_svm = svm(Z_train, y_train, Z_translate, y_translate)

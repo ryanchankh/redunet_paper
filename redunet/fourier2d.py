@@ -3,7 +3,7 @@ import time
 import numpy as np
 
 from .vector import Vector
-import train_func as tf
+import functionals as F
 
 class Fourier2D(Vector):
     def __init__(self, layers, eta, eps, lmbda=5000):
@@ -20,13 +20,13 @@ class Fourier2D(Vector):
                 for C_j in self.Cs])
         clus, y_approx = self.nonlinear(comp)
         V = V + self.eta * (expd - clus)
-        V = tf.normalize(V)
+        V = F.normalize(V)
         return V, y_approx
 
     def compute_E(self, V):
         m, C, H, W = V.shape
         alpha = C / (m * self.eps)
-        pre_inv = alpha * tf.batch_cov(V, self.arch.batch_size) \
+        pre_inv = alpha * F.batch_cov(V, self.arch.batch_size) \
                   + np.eye(C)[..., np.newaxis, np.newaxis]
         E = np.empty_like(pre_inv).astype(np.complex)
         for h, w in product(range(H), range(W)):
@@ -42,7 +42,7 @@ class Fourier2D(Vector):
             if m_j == 0:
                 continue
             alpha_j = C / (m_j * self.eps)
-            pre_inv = alpha_j * tf.batch_cov(V_j, self.arch.batch_size) \
+            pre_inv = alpha_j * F.batch_cov(V_j, self.arch.batch_size) \
                 + np.eye(C)[..., np.newaxis, np.newaxis]
             for h, w in product(range(H), range(W)):
                 Cs[j, :, :, h, w] =  alpha_j * np.linalg.inv(pre_inv[:, :, h, w])
@@ -51,7 +51,7 @@ class Fourier2D(Vector):
     def compute_loss(self, V, y):
         m, C, H, W = V.shape
         alpha = C / (m * self.eps)
-        cov = alpha * tf.batch_cov(V, self.arch.batch_size) \
+        cov = alpha * F.batch_cov(V, self.arch.batch_size) \
                 + np.eye(C)[..., np.newaxis, np.newaxis]
         loss_expd = np.sum([np.linalg.slogdet(cov[:, :, h, w])[1] for h, w in product(range(H), range(W))]) / (2 * H * W)
 
@@ -63,15 +63,15 @@ class Fourier2D(Vector):
             if m_j == 0:
                 continue
             alpha_j = C / (m_j * self.eps) 
-            cov_j = alpha_j * tf.batch_cov(V_j, self.arch.batch_size) \
+            cov_j = alpha_j * F.batch_cov(V_j, self.arch.batch_size) \
                         + np.eye(C)[..., np.newaxis, np.newaxis]
             loss_comp += m_j / m * np.sum([np.linalg.slogdet(cov_j[:, :, h, w])[1] for h, w in product(range(H), range(W))]) / (2 * H * W)
         return loss_expd - loss_comp, loss_expd, loss_comp
 
     def preprocess(self, X):
-        Z = tf.normalize(X)
+        Z = F.normalize(X)
         return np.fft.fft2(X, norm='ortho', axes=(2, 3))
 
     def postprocess(self, X):
         Z = np.fft.ifft2(X, norm='ortho', axes=(2, 3))
-        return tf.normalize(Z)
+        return F.normalize(Z)

@@ -34,8 +34,6 @@ def translate1d(data, labels, stride=1):
     labels = np.array(labels_new)
     return data, labels
 
-translate_all = translate1d
-
 def translate2d(data, labels, stride=1):
     n_samples, _, H, W = data.shape
     data_new, labels_new = [], []

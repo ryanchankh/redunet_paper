@@ -1,18 +1,17 @@
 import os
+
 import numpy as np
 import matplotlib.pyplot as plt
-import pandas as pd
 from scipy.stats import norm
 import scipy.ndimage
-
-from sklearn.model_selection import train_test_split
+import pandas as pd
+from pandas.api.types import CategoricalDtype
+from sklearn.datasets import load_iris
 from sklearn.datasets import make_s_curve
-
+from sklearn.model_selection import train_test_split
 import torch
-from torch.utils.data import Dataset
-from torchvision.datasets import MNIST
 
-import train_func as tf
+import functionals as F
 
 def generate_wave(time, 
                   samples, 
@@ -178,7 +177,7 @@ def generate_2d(data, noise, samples, shuffle=False):
         data.append(X)
         targets += y
     data = np.concatenate(data)
-    data = tf.normalize(data)
+    data = F.normalize(data)
     targets = np.array(targets)
 
     if shuffle:
@@ -209,7 +208,7 @@ def generate_3d(data, noise, samples, shuffle=False):
         _Y = np.ones(samples, dtype=np.int32) * c
         X.append(_X)
         Y.append(_Y)
-    X = tf.normalize(np.vstack(X))
+    X = F.normalize(np.vstack(X))
     Y = np.hstack(Y)
     
     if shuffle:
@@ -219,7 +218,37 @@ def generate_3d(data, noise, samples, shuffle=False):
     return X.astype(np.float32), Y.astype(np.int32), 3
 
 
-def load_MNIST_polar(root, samples, channels, time, train=True):
+def load_MNIST(root, train=True):
+    from torchvision.datasets import MNIST
+    dataset = MNIST(root, train=train, download=True)
+    images = dataset.data.numpy()
+    labels = dataset.targets.numpy()
+    return images, labels
+
+def load_Iris(test_size=0.3, seed=42):
+    X, y = load_iris(return_X_y=True)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, shuffle=True,
+                                                        test_size=test_size,
+                                                        random_state=seed)
+    X_train = F.normalize(X_train)
+    X_test = F.normalize(X_test)
+    num_classes = 3
+    return X_train, y_train, X_test, y_test, num_classes
+
+def load_Mice(root, test_size=0.3, seed=42):
+    df_data = pd.read_csv('./data/mice/data.csv')
+    df_data = pd.read_csv(root)
+    df_data = df_data.fillna(df_data.mean())
+    df_data['class'] = df_data['class'].astype('category').cat.codes
+    X = df_data.to_numpy()[:, 1:78].astype(np.float32)
+    X = F.normalize(X)
+    y = df_data['class'].to_numpy().astype(np.int32)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, random_state=seed)
+    num_classes = 8
+    return X_train, y_train, X_test, y_test, num_classes
+
+
+def load_MNIST_polar(root, samples, channels, time, train=True): #TODO
     dataset = MNIST(root, train=train, download=True)
     images = dataset.data[:samples].numpy()
     labels = dataset.targets[:samples].numpy()
@@ -233,4 +262,3 @@ def load_MNIST_polar(root, samples, channels, time, train=True):
         polar_imgs.append(X_rot[:, mid_pt, r])
     polar_imgs = np.stack(polar_imgs).transpose(1, 2, 0)
     return polar_imgs, labels
-

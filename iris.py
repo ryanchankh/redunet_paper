@@ -2,26 +2,19 @@ import argparse
 import os
 
 import numpy as np
-from sklearn.datasets import load_iris
-from sklearn.model_selection import train_test_split
 
-from arch import (
-    Architecture, 
-    Lift1D,
-    Vector
-)
+from redunet import Architecture, Vector
 import dataset
 import evaluate
 import plot
-import train_func as tf
 import utils
 
 
 # hyperparameters
 parser = argparse.ArgumentParser()
-parser.add_argument('--layers', type=int, help="number of layers")
-parser.add_argument('--eta', type=float, help='learning rate')
-parser.add_argument('--eps', type=float, help='eps squared')
+parser.add_argument('--layers', required=True, type=int, help="number of layers")
+parser.add_argument('--eta', required=True, type=float, help='learning rate')
+parser.add_argument('--eps', required=True, type=float, help='eps squared')
 parser.add_argument('--lmbda', type=float, default=5000, help='lambda')
 parser.add_argument('--tail', type=str, default='',
                     help='extra information to add to folder name')
@@ -36,12 +29,7 @@ os.makedirs(model_dir, exist_ok=True)
 utils.save_params(model_dir, vars(args))
 
 # data setup
-X, y = load_iris(return_X_y=True)
-X_train, X_test, y_train, y_test = train_test_split(X, y, shuffle=True, test_size=0.3)
-X_train = tf.normalize(X_train)
-X_test = tf.normalize(X_test)
-num_classes = 3
-print(X_train.shape, X_test.shape, y_train.shape, y_test.shape)
+X_train, y_train, X_test, y_test, num_classes = dataset.load_Iris(0.3)
 
 # model setup
 layers = [Vector(args.layers, eta=args.eta, eps=args.eps, lmbda=args.lmbda)]
@@ -74,9 +62,3 @@ plot.plot_heatmap(X_train, y_train, "X_train", model_dir)
 plot.plot_heatmap(X_test, y_test, "X_test", model_dir)
 plot.plot_heatmap(Z_train, y_train, "Z_train", model_dir)
 plot.plot_heatmap(Z_test, y_test, "Z_test", model_dir)
-# save per layers
-# layers_dir = os.path.join(model_dir, "features", "layers")
-# for filename in os.listdir(layers_dir):
-#     filepath = os.path.join(layers_dir, filename)
-#     Z = np.load(filepath)
-#     plot.plot_2d(Z, y_init, filename[:-4], model_dir)

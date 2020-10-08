@@ -4,25 +4,20 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 
-from arch import (
-    Architecture, 
-    Lift1D,
-    Vector
-)
+from redunet import Architecture, Vector
 import dataset
 import evaluate
 import plot
-import train_func as tf
 import utils
 
 
 # hyperparameters
 parser = argparse.ArgumentParser()
-parser.add_argument('--samples', type=int, help="number of samples for initialization")
-parser.add_argument('--layers', type=int, help="number of layers")
-parser.add_argument('--eta', type=float, help='learning rate')
-parser.add_argument('--eps', type=float, help='eps squared')
-parser.add_argument('--noise', type=float, help='noise')
+parser.add_argument('--samples', type=int, required=True, help="number of samples for initialization")
+parser.add_argument('--layers', type=int, required=True, help="number of layers")
+parser.add_argument('--eta', type=float, required=True, help='learning rate')
+parser.add_argument('--eps', type=float, required=True, help='eps squared')
+parser.add_argument('--noise', type=float, required=True, help='noise')
 parser.add_argument('--lmbda', type=float, default=5000, help='lambda')
 parser.add_argument('--data', type=int, help='choice of distributions for data')
 parser.add_argument('--tail', type=str, default='',
@@ -37,6 +32,7 @@ model_dir = os.path.join(args.save_dir, "gaussian3d", f"data{args.data}_noise{ar
                          "".format(args.samples, args.layers, args.eps, args.eta))
 os.makedirs(model_dir, exist_ok=True)
 utils.save_params(model_dir, vars(args))
+print(model_dir)
 
 # data setup
 X_train, y_train, num_classes = dataset.generate_3d(args.data, args.noise, args.samples, shuffle=True)

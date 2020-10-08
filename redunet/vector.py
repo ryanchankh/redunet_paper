@@ -1,7 +1,7 @@
 
 import os
 import numpy as np
-import train_func as tf
+import functionals as F
 from scipy.special import softmax
 
 class Vector:
@@ -13,6 +13,12 @@ class Vector:
 
     def __call__(self, Z, y=None):
         init = y is not None
+        if init:
+            self.compute_gam(y)
+            self.save_gam()
+        else:
+            self.load_gam()
+
         for layer in range(self.layers):
             Z, y_approx = self.forward(layer, Z, y, init)
 
@@ -32,7 +38,7 @@ class Vector:
         comp = np.stack([Z @ C.T for C in self.Cs])
         clus, y_approx = self.nonlinear(comp)
         Z = Z + self.eta * (expd - clus)
-        Z = tf.normalize(Z)
+        Z = F.normalize(Z)
         return Z, y_approx
 
     def load_arch(self, arch, block_id):
@@ -94,10 +100,10 @@ class Vector:
     def preprocess(self, X):
         m = X.shape[0]
         X = X.reshape(m, -1)
-        return tf.normalize(X)
+        return F.normalize(X)
 
     def postprocess(self, X):
-        return tf.normalize(X)
+        return F.normalize(X)
 
     def nonlinear(self, Bz):
         axes = tuple(np.arange(2, len(Bz.shape)))
@@ -125,7 +131,17 @@ class Vector:
         weights = np.load(save_path)
         self.E = weights[0]
         self.Cs = weights[1:]
-        return self
+
+    def save_gam(self):
+        weight_dir = os.path.join(self.arch.model_dir, "weights")
+        os.makedirs(weight_dir, exist_ok=True)
+        save_path = os.path.join(weight_dir, f"{self.block_id}_gam.npy")
+        np.save(save_path, self.gam)
+
+    def load_gam(self):
+        weight_dir = os.path.join(self.arch.model_dir, "weights")
+        save_path = os.path.join(weight_dir, f"{self.block_id}_gam.npy")
+        self.gam = np.load(save_path)
 
     def save_layer(self, layer, Z):
         layer_dir = os.path.join(self.arch.model_dir, "features", "layers")

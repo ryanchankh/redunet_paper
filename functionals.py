@@ -83,3 +83,14 @@ def generate_kernel(mode, out_channels, in_channels, kernel_size):
     elif mode == 'ones':
         return np.ones(size=(out_channels, in_channels, kernel_size))
 
+def convert2polar(images, channels, timesteps):
+    mid_pt = images.shape[1] // 2
+    r = np.linspace(0, mid_pt, channels).astype(np.int32)
+    angles = np.linspace(0, 360, timesteps)
+    polar_imgs = []
+    for angle in angles:
+        X_rot = scipy.ndimage.rotate(images, angle, axes=(1, 2), reshape=False)
+        polar_imgs.append(X_rot[:, mid_pt, r])
+    polar_imgs = np.stack(polar_imgs).transpose(1, 2, 0)
+    return polar_imgs
+

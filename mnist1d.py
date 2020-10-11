@@ -42,10 +42,10 @@ utils.save_params(model_dir, vars(args))
 X_train, y_train = dataset.load_MNIST("./data/mnist/", train=True)
 X_test, y_test = dataset.load_MNIST("./data/mnist", train=False)
 X_train, y_train = F.filter_class(X_train, y_train, args.classes, args.samples)
-X_train = dataset.convert2polar(X_train, args.channels, args.time)
+X_train = F.convert2polar(X_train, args.channels, args.time)
 X_train, y_train = F.shuffle(X_train, y_train)
 X_test, y_test = F.filter_class(X_test, y_test, args.classes, args.samples)
-X_test = dataset.convert2polar(X_test, args.channels, args.time)
+X_test = F.convert2polar(X_test, args.channels, args.time)
 
 # setup architecture
 layers = [Fourier1D(args.layers, eta=args.eta, eps=args.eps)]

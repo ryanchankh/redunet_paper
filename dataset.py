@@ -217,7 +217,6 @@ def generate_3d(data, noise, samples, shuffle=False):
 
     return X.astype(np.float32), Y.astype(np.int32), 3
 
-
 def load_MNIST(root, train=True):
     from torchvision.datasets import MNIST
     dataset = MNIST(root, train=train, download=True)
@@ -247,29 +246,3 @@ def load_Mice(root, test_size=0.3, seed=42):
     num_classes = 8
     return X_train, y_train, X_test, y_test, num_classes
 
-
-def convert2polar(images, channels, timesteps):
-    mid_pt = images.shape[1] // 2
-    r = np.linspace(0, mid_pt, channels).astype(np.int32)
-    angles = np.linspace(0, 360, timesteps)
-    polar_imgs = []
-    for angle in angles:
-        X_rot = scipy.ndimage.rotate(images, angle, axes=(1, 2), reshape=False)
-        polar_imgs.append(X_rot[:, mid_pt, r])
-    polar_imgs = np.stack(polar_imgs).transpose(1, 2, 0)
-    return polar_imgs
-
-def load_MNIST_polar(root, samples, channels, time, train=True): #TODO
-    dataset = MNIST(root, train=train, download=True)
-    images = dataset.data[:samples].numpy()
-    labels = dataset.targets[:samples].numpy()
-    mid_pt = images.shape[1] // 2
-    r = np.linspace(0, mid_pt, channels).astype(np.int32)
-    angles = np.linspace(0, 360, time)
-
-    polar_imgs = []
-    for angle in angles:
-        X_rot = scipy.ndimage.rotate(images, angle, axes=(1, 2), reshape=False)
-        polar_imgs.append(X_rot[:, mid_pt, r])
-    polar_imgs = np.stack(polar_imgs).transpose(1, 2, 0)
-    return polar_imgs, labels

@@ -235,8 +235,10 @@ def load_Iris(test_size=0.3, seed=42):
     return X_train, y_train, X_test, y_test, num_classes
 
 def load_Mice(root, test_size=0.3, seed=42):
-    df_data = pd.read_csv('./data/mice/data.csv')
-    df_data = pd.read_csv(root)
+    """Download data by running the following command in shell 
+    `curl https://archive.ics.uci.edu/ml/machine-learning-databases/00342/Data_Cortex_Nuclear.xls --output data.xls`
+    """
+    df_data = pd.read_excel(root, sheet_name='Hoja1')
     df_data = df_data.fillna(df_data.mean())
     df_data['class'] = df_data['class'].astype('category').cat.codes
     X = df_data.to_numpy()[:, 1:78].astype(np.float32)

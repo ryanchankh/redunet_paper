@@ -34,7 +34,7 @@ utils.save_params(model_dir, vars(args))
 print(model_dir)
 
 # data setup
-X_train, y_train, X_test, y_test, num_classes = dataset.load_Mice('./data/mice/data.csv')
+X_train, y_train, X_test, y_test, num_classes = dataset.load_Mice('./data/mice/mice.xls')
 
 # model setup
 layers = [Vector(args.layers, eta=args.eta, eps=args.eps, lmbda=args.lmbda)]

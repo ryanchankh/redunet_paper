@@ -235,7 +235,6 @@ def load_Iris(test_size=0.3, seed=42):
     return X_train, y_train, X_test, y_test, num_classes
 
 def load_Mice(root, test_size=0.3, seed=42):
-    df_data = pd.read_csv('./data/mice/data.csv')
     df_data = pd.read_csv(root)
     df_data = df_data.fillna(df_data.mean())
     df_data['class'] = df_data['class'].astype('category').cat.codes

@@ -4,6 +4,8 @@ import numpy as np
 
 from .vector import Vector
 import functionals as F
+import sys
+
 
 class Fourier2D(Vector):
     def __init__(self, layers, eta, eps, lmbda=5000):
@@ -13,12 +15,19 @@ class Fourier2D(Vector):
         if init:
             self.init(V, y)
             self.save_weights(layer)
+            mode = 'train'
         else:
             self.load_weights(layer)
+            mode = 'test'
         expd = np.einsum("bi...,ih...->bh...", V, self.E.conj(), optimize=True)
         comp = np.stack([np.einsum("bi...,ih...->bh...", V, C_j.conj(), optimize=True) \
                 for C_j in self.Cs])
-        clus, y_approx = self.nonlinear(comp)
+        if init:
+            clus = self.nonlinear_gt(comp, y)
+            _, y_approx = self.nonlinear(comp)
+        else:
+            clus, y_approx = self.nonlinear(comp)
+        np.save(f'./labels/{mode}_layer{layer}.npy', y_approx)
         V = V + self.eta * (expd - clus)
         V = F.normalize(V)
         return V, y_approx

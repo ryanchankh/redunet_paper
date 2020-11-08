@@ -36,10 +36,18 @@ class Vector:
             self.load_weights(layer)
         expd = Z @ self.E.T
         comp = np.stack([Z @ C.T for C in self.Cs])
-        clus, y_approx = self.nonlinear(comp)
+        clus = self.nonlinear(comp)
         Z = Z + self.eta * (expd - clus)
         Z = F.normalize(Z)
         return Z, y_approx
+
+    def nonlinear_gt(self, Bz, y):
+        pi = np.zeros_like(Bz)
+        for j in range(self.num_classes):
+            pi[j, (y == int(j))] = 1.
+        gam = np.expand_dims(self.gam, tuple(np.arange(1, len(Bz.shape))))
+        out = np.sum(gam * Bz * pi, axis=0)
+        return out
 
     def load_arch(self, arch, block_id):
         self.arch = arch

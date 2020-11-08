@@ -52,7 +52,8 @@ X_translate, y_translate = F.translate2d(X_each, y_each, stride=5)
 
 # setup architecture
 kernels = np.random.normal(0, 1, size=(5, 1, 3, 3))
-layers = [Lift2D(kernels)] + [Fourier2D(args.layers, eta=args.eta, eps=args.eps)]
+#layers = [Lift2D(kernels)] + [Fourier2D(args.layers, eta=args.eta, eps=args.eps, lmbda=args.lmbda)]
+layers = [Fourier2D(args.layers, eta=args.eta, eps=args.eps, lmbda=args.lmbda)]
 model = Architecture(layers, model_dir, len(args.classes))
 
 # train/test pass
@@ -62,24 +63,34 @@ utils.save_loss(model.loss_dict, model_dir, "train")
 print("Forward pass - test features")
 Z_test = model(X_test).real
 utils.save_loss(model.loss_dict, model_dir, "test")
-print("Forward pass - translated features")
-Z_translate = model(X_translate).real
-utils.save_loss(model.loss_dict, model_dir, "translate")
+#print("Forward pass - translated features")
+#Z_translate = model(X_translate).real
+#utils.save_loss(model.loss_dict, model_dir, "translate")
+
+# train and test accuracy
+for l in range(args.layers):
+    y_approx_train = np.load(f'./labels/train_layer{l}.npy')
+    y_approx_test = np.load(f'./labels/test_layer{l}.npy')
+    acc_train = evaluate.compute_accuracy(y_approx_train, y_train)
+    acc_test = evaluate.compute_accuracy(y_approx_test, y_test)
+    print(f'layer: {l} | train: {acc_train:.7f} | test: {acc_test:.7f}')
 
 # save features
 utils.save_features(model_dir, "X_train", X_train, y_train)
 utils.save_features(model_dir, "X_test", X_test, y_test)
-utils.save_features(model_dir, "X_translate", X_translate, y_translate)
+#utils.save_features(model_dir, "X_translate", X_translate, y_translate)
 utils.save_features(model_dir, "Z_train", Z_train, y_train)
 utils.save_features(model_dir, "Z_test", Z_test, y_test)
-utils.save_features(model_dir, "Z_translate", Z_translate, y_translate)
+#utils.save_features(model_dir, "Z_translate", Z_translate, y_translate)
 
+plt.imsave('./train_img.png', X_train[0, 0])
+plt.imsave('./train_img_transformed.png', Z_train[0, 0])
 X_train = F.normalize(X_train.reshape(X_train.shape[0], -1))
 X_test = F.normalize(X_test.reshape(X_test.shape[0], -1))
-X_translate = F.normalize(X_translate.reshape(X_translate.shape[0], -1))
+#X_translate = F.normalize(X_translate.reshape(X_translate.shape[0], -1))
 Z_train = F.normalize(Z_train.reshape(Z_train.shape[0], -1))
 Z_test = F.normalize(Z_test.reshape(Z_test.shape[0], -1))
-Z_translate = F.normalize(Z_translate.reshape(Z_translate.shape[0], -1))
+#Z_translate = F.normalize(Z_translate.reshape(Z_translate.shape[0], -1))
 
 # evaluation test
 _, acc_svm = evaluate.svm(Z_train, y_train, Z_test, y_test)
@@ -89,17 +100,17 @@ acc = {"svm": acc_svm, "knn": acc_knn, "nearsub-svd": acc_svd}
 utils.save_params(model_dir, acc, name="acc_test.json")
 
 # evaluation translate
-_, acc_svm = evaluate.svm(Z_train, y_train, Z_translate, y_translate)
-acc_knn = evaluate.knn(Z_train, y_train, Z_translate, y_translate, k=5)
-acc_svd = evaluate.nearsub(Z_train, y_train, Z_translate, y_translate, n_comp=30)
-acc = {"svm": acc_svm, "knn": acc_knn, "nearsub-svd": acc_svd} 
-utils.save_params(model_dir, acc, name="acc_translate.json")
+#_, acc_svm = evaluate.svm(Z_train, y_train, Z_translate, y_translate)
+#acc_knn = evaluate.knn(Z_train, y_train, Z_translate, y_translate, k=5)
+#acc_svd = evaluate.nearsub(Z_train, y_train, Z_translate, y_translate, n_comp=30)
+#acc = {"svm": acc_svm, "knn": acc_knn, "nearsub-svd": acc_svd} 
+#utils.save_params(model_dir, acc, name="acc_translate.json")
 
 # plot
 plot.plot_combined_loss(model_dir)
 plot.plot_heatmap(X_train, y_train, "X_train", model_dir)
 plot.plot_heatmap(X_test, y_test, "X_test", model_dir)
-plot.plot_heatmap(X_translate, y_translate, "X_translate", model_dir)
+#plot.plot_heatmap(X_translate, y_translate, "X_translate", model_dir)
 plot.plot_heatmap(Z_train, y_train, "Z_train", model_dir)
 plot.plot_heatmap(Z_test, y_test, "Z_test", model_dir)
-plot.plot_heatmap(Z_translate, y_translate, "Z_translate", model_dir)
+#plot.plot_heatmap(Z_translate, y_translate, "Z_translate", model_dir)

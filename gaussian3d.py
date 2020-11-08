@@ -40,7 +40,7 @@ X_test, y_test, _ = dataset.generate_3d(args.data, args.noise, args.samples, shu
 
 # model setup
 layers = [Vector(args.layers, eta=args.eta, eps=args.eps, lmbda=args.lmbda)]
-model = Architecture(layers, model_dir, num_classes)
+model = Architecture(layers, model_dir, num_classes, save_layers=list(range(0, 25, 1)) + list(range(25, 3000, 25)))
 
 # train/test pass
 print("Forward pass - train features")

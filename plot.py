@@ -145,8 +145,19 @@ def plot_3d(Z, y, name, model_dir):
     [tick.label.set_fontsize(24) for tick in ax.zaxis.get_major_ticks()]
     ax.view_init(20, 15)
     plt.tight_layout()
-    fig.savefig(os.path.join(savedir, f"scatter3d-{name}.pdf"), dpi=200)
+    fig.savefig(os.path.join(savedir, f"scatter3d-{name}.jpg"), dpi=200)
     plt.close()
+
+def plot_3d_transformations(model_dir):
+    features_dir = os.path.join(model_dir, 'features', 'layers')
+    for filename in os.listdir(features_dir):
+        if filename[-4:] != '.npy':
+            continue
+        Z_layer = np.load(os.path.join(features_dir, filename))
+        y_layer = np.load(os.path.join(model_dir, 'features', 'X_train_labels.npy'))
+        plot_3d(Z_layer, y_layer, filename[:-4], model_dir)
+        print(filename)
+
 
 def plot_nearsub_angle(train_features, train_labels, test_features, test_labels, 
                        n_comp, model_dir, title, tail=""):
@@ -402,6 +413,7 @@ if __name__ == "__main__":
             plot_3d(X_test, y_test, "X_test", args.model_dir)
             plot_3d(Z_train, y_train, "Z_train", args.model_dir)
             plot_3d(Z_test, y_test, "Z_test", args.model_dir)
+            plot_3d_transformations(args.model_dir)
 
     if multichannel: # multichannel data
         X_translate = np.load(os.path.join(args.model_dir, "features", "X_translate_features.npy"))

@@ -21,7 +21,6 @@ class Vector:
 
         for layer in range(self.layers):
             Z, y_approx = self.forward(layer, Z, y, init)
-
             if self.arch.save_loss:
                 self.arch.update_loss(layer, *self.compute_loss(Z, y_approx))
             if init and layer in self.arch.save_layers:

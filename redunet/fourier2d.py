@@ -1,5 +1,4 @@
 from itertools import product
-import time
 import numpy as np
 
 from .vector import Vector

@@ -131,6 +131,7 @@ def baseline(train_features, train_labels, test_features, test_labels):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--model_dir', type=str, help='model directory')
+    parser.add_argument('--test_translate', type=bool, help='test translated features')
     parser.add_argument('--k', type=int, default=5, help='number of k for k-Nearest Neighbor')
     parser.add_argument('--n_comp', type=int, default=50, help='number of components')
     args = parser.parse_args()
@@ -161,14 +162,10 @@ if __name__ == "__main__":
     print("Train vs Test - Baseline")
     baseline(X_train, y_train, X_test, y_test)
 
-    if True: # multichannel data
+    if args.test_translate: # multichannel data
         X_translate = np.load(os.path.join(args.model_dir, "features", "X_translate_features.npy"))
         y_translate = np.load(os.path.join(args.model_dir, "features", "X_translate_labels.npy"))
         Z_translate = np.load(os.path.join(args.model_dir, "features", "Z_translate_features.npy"))
-
-#        X_translate = np.vstack([np.load(os.path.join(args.model_dir, "features", f"X_translate_features-{i}-{i+50}.npy")) for i in range(0, 1000, 50)])
-#        y_translate = np.hstack([np.load(os.path.join(args.model_dir, "features", f"y_translate_labels-{i}-{i+50}.npy")) for i in range(0, 1000, 50)])
-#        Z_translate = np.vstack([np.load(os.path.join(args.model_dir, "features", f"Z_translate_features-{i}-{i+50}.npy")) for i in range(0, 1000, 50)])
         X_translate = F.normalize(X_translate.reshape(X_translate.shape[0], -1))
         Z_translate = F.normalize(Z_translate.reshape(Z_translate.shape[0], -1))
 

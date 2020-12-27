@@ -1,6 +1,4 @@
 # Deep Networks from the Principle of Rate Reduction
-###### Kwan Ho Ryan Chan\*, Yaodong Yu\*, Chong You\*, Haozhi Qi, John Wright, Yi Ma
-
 This repository is the official implementation of the paper [Deep Networks from the Principle of Rate Reduction](https://arxiv.org/abs/2010.14765) (2020).
 
 ## Requirements

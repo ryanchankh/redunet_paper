@@ -145,7 +145,7 @@ if __name__ == "__main__":
     y_test = np.load(os.path.join(args.model_dir, "features", "Z_test_labels.npy"))
     Z_test = np.load(os.path.join(args.model_dir, "features", "Z_test_features.npy"))
 
-    classes = params['classes']
+#    classes = params['classes']
     multichannel = len(X_train.shape) > 2
     X_train = F.normalize(X_train.reshape(X_train.shape[0], -1))
     X_test = F.normalize(X_test.reshape(X_test.shape[0], -1))

@@ -1,9 +1,0 @@
-python3 iris.py --layers 1500 --eps 0.1 --eta 0.5 
-python3 iris.py --layers 1500 --eps 0.5 --eta 0.5 
-python3 iris.py --layers 1500 --eps 1.0 --eta 0.5 
-python3 iris.py --layers 1500 --eps 0.1 --eta 0.1
-python3 iris.py --layers 1500 --eps 0.5 --eta 0.1
-python3 iris.py --layers 1500 --eps 1.0 --eta 0.1
-python3 iris.py --layers 1500 --eps 0.1 --eta 1.0 
-python3 iris.py --layers 1500 --eps 0.5 --eta 1.0 
-python3 iris.py --layers 1500 --eps 1.0 --eta 1.0 

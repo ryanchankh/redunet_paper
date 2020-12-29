@@ -46,9 +46,9 @@ X_train, y_train = F.shuffle(X_train, y_train)
 X_test, y_test = F.filter_class(X_test, y_test, args.classes, args.samples)
 
 # setup architecture
-# kernels = np.random.normal(0, 1, size=(5, 1, 3, 3))
-# layers = [Lift2D(kernels)] + [Fourier2D(args.layers, eta=args.eta, eps=args.eps)]
-layers = [Fourier2D(args.layers, eta=args.eta, eps=args.eps)]
+kernels = np.random.normal(0, 1, size=(5, 1, 3, 3))
+layers = [Lift2D(kernels)] + [Fourier2D(args.layers, eta=args.eta, eps=args.eps)]
+# layers = [Fourier2D(args.layers, eta=args.eta, eps=args.eps)]
 model = Architecture(layers, model_dir, len(args.classes))
 
 # train/test pass

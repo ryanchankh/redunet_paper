@@ -4,7 +4,7 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 
-from arch import (
+from redunet import (
     Architecture, 
     Fourier1D, 
     Lift1D,
@@ -12,7 +12,7 @@ from arch import (
 import dataset
 import evaluate
 import plot
-import train_func as tf
+import functionals as F
 import utils
 
 # hyperparameters
@@ -45,7 +45,7 @@ X_test, y_test, _ = dataset.generate_wave(args.time, args.samples, args.data, sh
 X_translate, y_translate, _ = dataset.generate_wave(args.time, 5, args.data, shuffle=False, augment=True)
 
 # setup architecture
-kernels = tf.generate_kernel('gaussian', args.channels, 1, args.kernel)
+kernels = F.generate_kernel('gaussian', args.channels, 1, args.kernel)
 layers = [Lift1D(kernels)] + [Fourier1D(args.layers, eta=args.eta, eps=args.eps)]
 model = Architecture(layers, model_dir, num_classes)
 
@@ -69,12 +69,12 @@ utils.save_features(model_dir, "Z_test", Z_test, y_test)
 utils.save_features(model_dir, "Z_translate", Z_translate, y_translate)
 np.save(os.path.join(model_dir, "features", "kernel.npy"), kernels)
 
-X_train = tf.normalize(X_train.reshape(X_train.shape[0], -1))
-X_test = tf.normalize(X_test.reshape(X_test.shape[0], -1))
-X_translate = tf.normalize(X_translate.reshape(X_translate.shape[0], -1))
-Z_train = tf.normalize(Z_train.reshape(Z_train.shape[0], -1))
-Z_test = tf.normalize(Z_test.reshape(Z_test.shape[0], -1))
-Z_translate = tf.normalize(Z_translate.reshape(Z_translate.shape[0], -1))
+X_train = F.normalize(X_train.reshape(X_train.shape[0], -1))
+X_test = F.normalize(X_test.reshape(X_test.shape[0], -1))
+X_translate = F.normalize(X_translate.reshape(X_translate.shape[0], -1))
+Z_train = F.normalize(Z_train.reshape(Z_train.shape[0], -1))
+Z_test = F.normalize(Z_test.reshape(Z_test.shape[0], -1))
+Z_translate = F.normalize(Z_translate.reshape(Z_translate.shape[0], -1))
 
 # evaluation test
 _, acc_svm = evaluate.svm(Z_train, y_train, Z_test, y_test)

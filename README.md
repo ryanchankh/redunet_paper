@@ -54,13 +54,11 @@ $ python3 mnist2d.py --classes 0 1 --samples 500 --layers 2000 --eta 0.5 --eps 0
 For technical details and full experimental results, please check the [paper](https://arxiv.org/abs/2010.14765).
 
 ```
-@misc{chan2020deep,
-      title={Deep Networks from the Principle of Rate Reduction}, 
-      author={Kwan Ho Ryan Chan and Yaodong Yu and Chong You and Haozhi Qi and John Wright and Yi Ma},
-      year={2020},
-      eprint={2010.14765},
-      archivePrefix={arXiv},
-      primaryClass={cs.LG}
+@article{chan2020deep,
+  title={Deep networks from the principle of rate reduction},
+  author={Chan, Kwan Ho Ryan and Yu, Yaodong and You, Chong and Qi, Haozhi and Wright, John and Ma, Yi},
+  journal={arXiv preprint arXiv:2010.14765},
+  year={2020}
 }
 ```
 

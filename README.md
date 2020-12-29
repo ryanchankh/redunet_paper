@@ -9,7 +9,7 @@ This codebase is written for `python3`. To install necessary python packages, ru
 To train a model, one can run the training files, which has the dataset as thier names. For instance, to run a mixture of two Gaussians, one can run the command. 
 
 ```
-python3 gaussian2d.py --data 1 --noise 0.1 --samples 500 --layers 500 --eps 0.1 --eta 0.1
+$ python3 gaussian2d.py --data 1 --noise 0.1 --samples 500 --layers 500 --eps 0.1 --eta 0.1
 ```
 All the files for training is listed below: 
 
@@ -26,15 +26,29 @@ All the files for training is listed below:
 To obtain the performance of the trained model, please use the file `evaluate.py`. And use commands such as:
 
 ```
-python3 evaluate.py --model_dir ./saved_models/gaussian2d/data1_noise0.1/samples500_layers500_eps0.1_eta0.1
+$ python3 evaluate.py --model_dir ./saved_models/gaussian2d/data1_noise0.1/samples500_layers500_eps0.1_eta0.1
 ```
 
 ### Plotting
 To obtain plots, such as loss and principle components, please use the file `plot.py`. And use commands such as: 
+
 ```
-python3 plot.py --model_dir ./saved_models/gaussian2d/data1_noise0.1/samples500_layers500_eps0.1_eta0.1 --loss
+$ python3 plot.py --model_dir ./saved_models/gaussian2d/data1_noise0.1/samples500_layers500_eps0.1_eta0.1 --loss
 ```
 
+## Reproducing Experimental Results
+Here are the commands to reproduce some of the experiments listed in the paper:
+
+```
+$ python3 gaussian2d.py --data 1 --noise 0.1 --samples 500 --layers 2000 --eta 0.5 --eps 0.1
+$ python3 gaussian3d.py --data 1 --noise 0.1 --samples 500 --layers 2000 --eta 0.5 --eps 0.1
+$ python3 sinusoid.py --data 7 --kernel 3 --time 150 --samples 400 --channels 7 --layers 20 --eps 0.1 --eta 0.1
+$ python3 iris.py --layers 4000 --eta 0.1 --eps 0.1
+$ python3 mice.py --layers 4000 --eta 0.1 --eps 0.1
+$ python3 mnist.py --classes 0 1 --samples 500 --layers 2000 --eta 0.1 --eps 0.1
+$ python3 mnist1d.py --classes 0 1 --samples 2000 --time 200 --channels 5 --layers 3500 --eta 0.5 --eps 0.1
+$ python3 mnist2d.py --classes 0 1 --samples 500 --layers 2000 --eta 0.5 --eps 0.1
+```
 
 ## Reference
 For technical details and full experimental results, please check the [paper](https://arxiv.org/abs/2010.14765).

@@ -4,7 +4,7 @@ This repository is the official implementation of the paper [Deep Networks from 
 ## What is ReduNet?
 ReduNet is a deep neural network construcuted naturally by deriving the gradients of the Maximal Coding Rate Reduction (MCR<sup>2</sup>) [1] objective. Every layer of this network can be interpreted based on its mathematical operations and the network collectively is trained in a feed-forward manner only. In addition, by imposing shift invariant properties to our network, the convolutional operator can be derived using only the data and MCR<sup>2</sup> objective function, hence making our network design principled and interpretable. 
 
-[1] Yu, Yaodong, Kwan Ho Ryan Chan, Chong You, Chaobing Song, and Yi Ma. "Learning diverse and discriminative representations via the principle of maximal coding rate reduction." Advances in Neural Information Processing Systems 33 (2020). 
+[1] Yu, Yaodong, Kwan Ho Ryan Chan, Chong You, Chaobing Song, and Yi Ma. "[Learning diverse and discriminative representations via the principle of maximal coding rate reduction](https://proceedings.neurips.cc/paper/2020/file/6ad4174eba19ecb5fed17411a34ff5e6-Paper.pdf)" Advances in Neural Information Processing Systems 33 (2020). 
 
 ## Requirements
 This codebase is written for `python3`. To install necessary python packages, run `pip install -r requirements.txt`.
@@ -44,22 +44,38 @@ $ python3 plot.py --model_dir ./saved_models/gaussian2d/data1_noise0.1/samples50
 ## Reproducing Experimental Results
 Please refer to our paper's Section 3 and Appendix D for experimental results and figures. Here are the commands to reproduce some of the experiments listed in the paper:
 
-For vector case experiments (2D and 3D Mixture of Gaussians, Iris, Mice Protein, and MNIST):
+### For vector case experiments
 
+For 2D and 3D Mixture of Gaussians (Figure 4 in paper):
 ```
 $ python3 gaussian2d.py --data 1 --noise 0.1 --samples 500 --layers 2000 --eta 0.5 --eps 0.1
 $ python3 gaussian3d.py --data 1 --noise 0.1 --samples 500 --layers 2000 --eta 0.5 --eps 0.1
-$ python3 sinusoid.py --data 7 --kernel 3 --time 150 --samples 400 --channels 7 --layers 20 --eps 0.1 --eta 0.1
+```
+
+For Iris and Mice Protein (Table 2 in paper):
+```
 $ python3 iris.py --layers 4000 --eta 0.1 --eps 0.1
 $ python3 mice.py --layers 4000 --eta 0.1 --eps 0.1
+```
+
+For vector case MNIST:
+```
 $ python3 mnist.py --classes 0 1 --samples 500 --layers 2000 --eta 0.1 --eps 0.1
 ```
-For 1D signals (Sinusoids, Rotational Invariant MNIST):
 
+### For Shift-invariant experiments
+
+For 1D signals (Sinusoids, Figure 5 (a)-(d) in paper):
+```
+TODO
+```
+
+For 1D signals (Rotational Invariant MNIST, Figure 5 (e)-(h) & Table 1 in paper):
 ```
 $ python3 mnist1d.py --classes 0 1 --samples 2000 --time 200 --channels 5 --layers 3500 --eta 0.5 --eps 0.1
 ```
-For 2D translational invariant data (MNIST):
+
+For 2D translational invariant MNIST data (Table 1 in paper):
 
 ```
 $ python3 mnist2d.py --classes 0 1 --samples 500 --layers 2000 --eta 0.5 --eps 0.1

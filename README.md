@@ -1,6 +1,11 @@
 # Deep Networks from the Principle of Rate Reduction
 This repository is the official implementation of the paper [Deep Networks from the Principle of Rate Reduction](https://arxiv.org/abs/2010.14765) (2020).
 
+## What is ReduNet?
+ReduNet is a deep neural network construcuted naturally by deriving the gradients of the Maximal Coding Rate Reduction (MCR<sup>2</sup>) [1] objective. Every layer of this network can be interpreted based on its mathematical operations and the network collectively is trained in a feed-forward manner only. In addition, by imposing shift invariant properties to our network, the convolutional operator can be derived using only the data and MCR<sup>2</sup> objective function, hence making our network design principled and interpretable. 
+
+[1] Yu, Yaodong, Kwan Ho Ryan Chan, Chong You, Chaobing Song, and Yi Ma. "Learning diverse and discriminative representations via the principle of maximal coding rate reduction." Advances in Neural Information Processing Systems 33 (2020). 
+
 ## Requirements
 This codebase is written for `python3`. To install necessary python packages, run `pip install -r requirements.txt`.
 

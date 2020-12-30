@@ -5,7 +5,8 @@ This repository is the official implementation of the paper [Deep Networks from 
 ReduNet is a deep neural network construcuted naturally by deriving the gradients of the Maximal Coding Rate Reduction (MCR<sup>2</sup>) [1] objective. Every layer of this network can be interpreted based on its mathematical operations and the network collectively is trained in a feed-forward manner only. In addition, by imposing shift invariant properties to our network, the convolutional operator can be derived using only the data and MCR<sup>2</sup> objective function, hence making our network design principled and interpretable. 
 
 <p align="center">
-    <img src="images/arch-redunet.jpg" width="350"\>
+    <img src="images/arch-redunet.jpg" width="350"\><br>
+	Figure: Weights and operations for one layer of ReduNet
 </p>
 <p align="center">
 

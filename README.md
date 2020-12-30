@@ -42,7 +42,9 @@ $ python3 plot.py --model_dir ./saved_models/gaussian2d/data1_noise0.1/samples50
 ```
 
 ## Reproducing Experimental Results
-Here are the commands to reproduce some of the experiments listed in the paper:
+Please refer to our paper's Section 3 and Appendix D for experimental results and figures. Here are the commands to reproduce some of the experiments listed in the paper:
+
+For vector case experiments (2D and 3D Mixture of Gaussians, Iris, Mice Protein, and MNIST):
 
 ```
 $ python3 gaussian2d.py --data 1 --noise 0.1 --samples 500 --layers 2000 --eta 0.5 --eps 0.1
@@ -51,7 +53,15 @@ $ python3 sinusoid.py --data 7 --kernel 3 --time 150 --samples 400 --channels 7 
 $ python3 iris.py --layers 4000 --eta 0.1 --eps 0.1
 $ python3 mice.py --layers 4000 --eta 0.1 --eps 0.1
 $ python3 mnist.py --classes 0 1 --samples 500 --layers 2000 --eta 0.1 --eps 0.1
+```
+For 1D signals (Sinusoids, Rotational Invariant MNIST):
+
+```
 $ python3 mnist1d.py --classes 0 1 --samples 2000 --time 200 --channels 5 --layers 3500 --eta 0.5 --eps 0.1
+```
+For 2D translational invariant data (MNIST):
+
+```
 $ python3 mnist2d.py --classes 0 1 --samples 500 --layers 2000 --eta 0.5 --eps 0.1
 ```
 

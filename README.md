@@ -4,7 +4,13 @@ This repository is the official implementation of the paper [Deep Networks from 
 ## What is ReduNet?
 ReduNet is a deep neural network construcuted naturally by deriving the gradients of the Maximal Coding Rate Reduction (MCR<sup>2</sup>) [1] objective. Every layer of this network can be interpreted based on its mathematical operations and the network collectively is trained in a feed-forward manner only. In addition, by imposing shift invariant properties to our network, the convolutional operator can be derived using only the data and MCR<sup>2</sup> objective function, hence making our network design principled and interpretable. 
 
-<center><img src="./arch-redunet.jpg" width="350"/></center>
+<p align="center">
+    <img src="images/arch-redunet.jpg" width="350"\>
+</p>
+<p align="center">
+
+
+
 
 [1] Yu, Yaodong, Kwan Ho Ryan Chan, Chong You, Chaobing Song, and Yi Ma. "[Learning diverse and discriminative representations via the principle of maximal coding rate reduction](https://proceedings.neurips.cc/paper/2020/file/6ad4174eba19ecb5fed17411a34ff5e6-Paper.pdf)" Advances in Neural Information Processing Systems 33 (2020). 
 

@@ -47,18 +47,21 @@ Please refer to our paper's Section 3 and Appendix D for experimental results an
 ### For vector case experiments
 
 For 2D and 3D Mixture of Gaussians (Figure 4 in paper):
+
 ```
 $ python3 gaussian2d.py --data 1 --noise 0.1 --samples 500 --layers 2000 --eta 0.5 --eps 0.1
 $ python3 gaussian3d.py --data 1 --noise 0.1 --samples 500 --layers 2000 --eta 0.5 --eps 0.1
 ```
 
 For Iris and Mice Protein (Table 2 in paper):
+
 ```
 $ python3 iris.py --layers 4000 --eta 0.1 --eps 0.1
 $ python3 mice.py --layers 4000 --eta 0.1 --eps 0.1
 ```
 
 For vector case MNIST:
+
 ```
 $ python3 mnist.py --classes 0 1 --samples 500 --layers 2000 --eta 0.1 --eps 0.1
 ```
@@ -66,11 +69,13 @@ $ python3 mnist.py --classes 0 1 --samples 500 --layers 2000 --eta 0.1 --eps 0.1
 ### For Shift-invariant experiments
 
 For 1D signals (Sinusoids, Figure 5 (a)-(d) in paper):
+
 ```
-TODO
+$ python3 sinusoid.py --time 150 --samples 400 --channels 7 --layers 2000 --eps 0.1 --eta 0.1 --data 7 --kernel 3
 ```
 
 For 1D signals (Rotational Invariant MNIST, Figure 5 (e)-(h) & Table 1 in paper):
+
 ```
 $ python3 mnist1d.py --classes 0 1 --samples 2000 --time 200 --channels 5 --layers 3500 --eta 0.5 --eps 0.1
 ```

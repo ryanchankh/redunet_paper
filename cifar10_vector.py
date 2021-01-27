@@ -32,11 +32,18 @@ os.makedirs(model_dir, exist_ok=True)
 utils.save_params(model_dir, vars(args))
 
 # data loading
-X_train, y_train = dataset.load_MNIST("./data/mnist/", train=True)
-X_test, y_test = dataset.load_MNIST("./data/mnist", train=False)
+trainset = CIFAR10("./data/cifar10/", train=True, download=True)
+X_train, y_train = trainset.data.transpose(0, 3, 1, 2), np.array(trainset.targets)
+testset = CIFAR10("./data/cifar10/", train=False, download=True)
+X_test, y_test = testset.data.transpose(0, 3, 1, 2), np.array(testset.targets)
 X_train, y_train = F.filter_class(X_train, y_train, args.classes, args.samples)
 X_train, y_train = F.shuffle(X_train, y_train)
 X_test, y_test = F.filter_class(X_test, y_test, args.classes, args.samples)
+
+# standardize data
+mean, std =  0.4733630111949825, 0.25156892869250536
+X_train = ((X_train / 255.) - mean) / std
+X_test = ((X_test / 255.) - mean) / std
 X_train = F.normalize(X_train.reshape(X_train.shape[0], -1))
 X_test = F.normalize(X_test.reshape(X_test.shape[0], -1))
 

@@ -25,7 +25,7 @@ parser.add_argument('--save_dir', type=str, default='./saved_models/',
                     help='base directory for saving PyTorch model. (default: ./saved_models/)')
 args = parser.parse_args()
 
-model_dir = os.path.join(args.save_dir, f"cifar10-vector-classes{''.join(map(str, args.classes))}",
+model_dir = os.path.join(args.save_dir, f"mnist-classes{''.join(map(str, args.classes))}",
                          "samples{}_layers{}_eps{}_eta{}{}"
                          "".format(args.samples, args.layers, args.eps, args.eta, args.tail))
 os.makedirs(model_dir, exist_ok=True)

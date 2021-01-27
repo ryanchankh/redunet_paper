@@ -38,7 +38,10 @@ print(X_train.shape, X_test.shape)
 if args.model == 'mnist2d':
     kernels = np.random.normal(0, 1, size=(params['outchannels'], 1, params['ksize'], params['ksize']))
     layers = [Lift2D(kernels)] + [Fourier2D(params['layers'], eta=params['eta'], eps=params['eps'])]
-elif args.model == 'mnist':
+elif args.model == 'cifar10':
+    kernels = np.random.normal(0, 1, size=(params['outchannels'], 3, params['ksize'], params['ksize']))
+    layers = [Lift2D(kernels)] + [Fourier2D(params['layers'], eta=params['eta'], eps=params['eps'])]
+elif args.model == 'mnist' or args.model == 'cifar10_vector':
     layers = [Vector(params['layers'], eta=params['eta'], eps=params['eps'])]
 else:
     raise NameError(f'model name {args.model} not valid.')
@@ -52,7 +55,7 @@ for batch_idx in range(0, X_test.shape[0], args.bs):
 
     X_translate, y_translate = F.translate2d(X_batch, y_batch, n=args.n, stride=args.stride)
     print(X_translate.shape)
-    if args.model == 'mnist':
+    if args.model == 'mnist' or args.model == 'cifar10_vector':
         X_trainslate = X_translate.reshape(X_translate.shape[0], -1)
     Z_translate = model(X_translate).real
 

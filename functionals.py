@@ -24,28 +24,32 @@ def get_n_each(X, y, n=1):
         _y.append(y_class)
     return np.vstack(_X), np.hstack(_y)
 
-def translate1d(data, labels, stride=1):
+def translate1d(data, labels, n=None, stride=1):
     n_samples, _, n_dim = data.shape
-    data_new, labels_new = [], []
-    for i in range(n_samples):
-        for r in range(0, n_dim, stride):
-            data_new.append(np.roll(data[i], r, axis=1))
-            labels_new.append(labels[i])
-    data = np.stack(data_new)
-    labels = np.array(labels_new)
-    return data, labels
+    data_new = []
+    if n is None:
+        shifts = np.arange(0, n_dim, stride)
+    else:
+        shifts = np.arange(-n*stride, (n+1)*stride, stride)
+    for r in shifts:
+        data_new.append(np.roll(data, r, axis=2))
+    return (np.vstack(data_new), 
+            np.tile(labels, len(shifts)))
 
-def translate2d(data, labels, stride=1):
+def translate2d(data, labels, n=None, stride=1):
     n_samples, _, H, W = data.shape
-    data_new, labels_new = [], []
-    for i in range(n_samples):
-        for h in range(0, H, stride):
-            for w in range(0, W, stride):
-                data_new.append(np.roll(data[i], (h, w), axis=(1, 2)))
-                labels_new.append(labels[i])
-    data = np.stack(data_new)
-    labels = np.array(labels_new)
-    return data, labels
+    data_new = []
+    if n is None:
+        vshifts = np.arange(0, H, stride)
+        hshifts = np.arange(0, W, stride)
+    else:
+        hshifts = np.arange(-n*stride, (n+1)*stride, stride)
+        vshifts = np.arange(-n*stride, (n+1)*stride, stride)
+    for h in vshifts:
+        for w in hshifts:
+            data_new.append(np.roll(data, (h, w), axis=(2, 3)))
+    return (np.vstack(data_new),
+            np.tile(labels, len(vshifts)*len(hshifts)))
 
 def shuffle(data, labels):
     num_samples = data.shape[0]

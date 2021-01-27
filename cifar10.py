@@ -19,6 +19,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--samples', type=int, help="number of samples for initialization")
 parser.add_argument('--classes', nargs="+", type=int, help="Classes to Keep (Example: 0 1)")
 parser.add_argument('--outchannels', type=int, default =5, help="number of output channels for kernel")
+parser.add_argument('--ksize', type=int, default =3, help="kernel size")
 parser.add_argument('--layers', type=int, help="number of layers")
 parser.add_argument('--eta', type=float, help='learning rate')
 parser.add_argument('--eps', type=float, help='eps squared')
@@ -30,8 +31,9 @@ parser.add_argument('--save_dir', type=str, default='./saved_models/',
 args = parser.parse_args()
 
 model_dir = os.path.join(args.save_dir, f"cifar10-classes{''.join(map(str, args.classes))}",
-                         "samples{}_layers{}_eps{}_eta{}_outchannels{}{}"
-                         "".format(args.samples, args.layers, args.eps, args.eta, args.outchannels, args.tail))
+                         "samples{}_layers{}_eps{}_eta{}_outchannels{}_ksize{}{}"
+                         "".format(args.samples, args.layers, args.eps, args.eta, args.outchannels, args.ksize, args.tail))
+print(model_dir)
 os.makedirs(model_dir, exist_ok=True)
 utils.save_params(model_dir, vars(args))
 
@@ -50,7 +52,7 @@ X_train = ((X_train / 255.) - mean) / std
 X_test = ((X_test / 255.) - mean) / std
 
 # setup architecture
-kernels = np.random.normal(0, 1, size=(args.outchannels, 3, 3, 3))
+kernels = np.random.normal(0, 1, size=(args.outchannels, 3, args.ksize, args.ksize))
 layers = [Lift2D(kernels)] + [Fourier2D(args.layers, eta=args.eta, eps=args.eps)]
 # layers = [Fourier2D(args.layers, eta=args.eta, eps=args.eps)]
 model = Architecture(layers, model_dir, len(args.classes))

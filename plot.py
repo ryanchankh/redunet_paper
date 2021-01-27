@@ -20,7 +20,7 @@ def plot_heatmap(features, labels, title, model_dir):
     sim_mat = np.abs(features_sort_ @ features_sort_.T)
     print(sim_mat.min(), sim_mat.max())
 
-    plt.rc('text', usetex=True)
+#    plt.rc('text', usetex=True)
     plt.rcParams['font.family'] = 'serif'
     plt.rcParams['font.serif'] = ['Times New Roman']
     fig, ax = plt.subplots(figsize=(8, 7), sharey=True, sharex=True, dpi=400)
@@ -47,7 +47,7 @@ def plot_combined_loss(model_dir):
     Figure 3: gaussian2d, gaussian3d, fontsize 24
 
     """
-    plt.rc('text', usetex=True)
+#    plt.rc('text', usetex=True)
     plt.rcParams['font.family'] = 'serif'
     plt.rcParams['font.serif'] = ['Times New Roman']
     fig, ax = plt.subplots(1, 1, figsize=(7, 5), sharey=True, sharex=True)
@@ -182,7 +182,7 @@ def plot_nearsub_angle(train_features, train_labels, test_features, test_labels,
     fs_test, _ = utils.sort_dataset(test_features, test_labels, 
                             classes=classes, stack=False)
     for class_train in classes:
-        plt.rc('text', usetex=True)
+#        plt.rc('text', usetex=True)
         plt.rcParams['font.family'] = 'serif'
         plt.rcParams['font.serif'] = ['Times New Roman']
         fig, ax = plt.subplots(figsize=(7, 5))

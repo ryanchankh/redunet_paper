@@ -23,7 +23,7 @@ parser.add_argument('--ksize', type=int, default=3, help="kernel size")
 parser.add_argument('--layers', type=int, help="number of layers")
 parser.add_argument('--eta', type=float, help='learning rate')
 parser.add_argument('--eps', type=float, help='eps squared')
-parser.add_argument('--lmbda', type=float, default=5000, help='lambda')
+parser.add_argument('--lmbda', type=float, default=500, help='lambda')
 parser.add_argument('--tail', type=str, default='',
                     help='extra information to add to folder name')
 parser.add_argument('--save_dir', type=str, default='./saved_models/',
@@ -89,6 +89,17 @@ Z_test = F.normalize(Z_test.reshape(Z_test.shape[0], -1))
 Z_translate_train = F.normalize(Z_translate_train.reshape(Z_translate_train.shape[0], -1))
 Z_translate_test = F.normalize(Z_translate_test.reshape(Z_translate_test.shape[0], -1))
 
+# plot
+plot.plot_combined_loss(model_dir)
+plot.plot_heatmap(X_train, y_train, "X_train", model_dir)
+plot.plot_heatmap(X_test, y_test, "X_test", model_dir)
+plot.plot_heatmap(X_translate_train, y_translate_train, "X_translate_train", model_dir)
+plot.plot_heatmap(X_translate_test, y_translate_test, "X_translate_test", model_dir)
+plot.plot_heatmap(Z_train, y_train, "Z_train", model_dir)
+plot.plot_heatmap(Z_test, y_test, "Z_test", model_dir)
+plot.plot_heatmap(Z_translate_train, y_translate_train, "Z_translate_train", model_dir)
+plot.plot_heatmap(Z_translate_test, y_translate_test, "Z_translate_test", model_dir)
+
 # evaluation test
 _, acc_svm = evaluate.svm(Z_train, y_train, Z_test, y_test)
 acc_knn = evaluate.knn(Z_train, y_train, Z_test, y_test, k=5)
@@ -110,13 +121,3 @@ acc_svd = evaluate.nearsub(Z_train, y_train, Z_translate_test, y_translate_test,
 acc = {"svm": acc_svm, "knn": acc_knn, "nearsub-svd": acc_svd} 
 utils.save_params(model_dir, acc, name="acc_translate_test.json")
 
-# plot
-plot.plot_combined_loss(model_dir)
-plot.plot_heatmap(X_train, y_train, "X_train", model_dir)
-plot.plot_heatmap(X_test, y_test, "X_test", model_dir)
-plot.plot_heatmap(X_translate_train, y_translate_train, "X_translate_train", model_dir)
-plot.plot_heatmap(X_translate_test, y_translate_test, "X_translate_test", model_dir)
-plot.plot_heatmap(Z_train, y_train, "Z_train", model_dir)
-plot.plot_heatmap(Z_test, y_test, "Z_test", model_dir)
-plot.plot_heatmap(Z_translate_train, y_translate_train, "Z_translate_train", model_dir)
-plot.plot_heatmap(Z_translate_test, y_translate_test, "Z_translate_test", model_dir)

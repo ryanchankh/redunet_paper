@@ -107,21 +107,21 @@ plot.plot_heatmap(Z_translate_test, y_translate_test, "Z_translate_test", model_
 # evaluation test
 _, acc_svm = evaluate.svm(Z_train, y_train, Z_test, y_test)
 acc_knn = evaluate.knn(Z_train, y_train, Z_test, y_test, k=5)
-acc_svd = evaluate.nearsub(Z_train, y_train, Z_test, y_test, n_comp=20)
+acc_svd = evaluate.nearsub(Z_train, y_train, Z_test, y_test, n_comp=10)
 acc = {"svm": acc_svm, "knn": acc_knn, "nearsub-svd": acc_svd} 
 utils.save_params(model_dir, acc, name="acc_test.json")
 
 # evaluation translate train
 _, acc_svm = evaluate.svm(Z_train, y_train, Z_translate_train, y_translate_train)
 acc_knn = evaluate.knn(Z_train, y_train, Z_translate_train, y_translate_train, k=5)
-acc_svd = evaluate.nearsub(Z_train, y_train, Z_translate_train, y_translate_train, n_comp=20)
+acc_svd = evaluate.nearsub(Z_train, y_train, Z_translate_train, y_translate_train, n_comp=10)
 acc = {"svm": acc_svm, "knn": acc_knn, "nearsub-svd": acc_svd} 
 utils.save_params(model_dir, acc, name="acc_translate_train.json")
 
 # evaluation translate test
 _, acc_svm = evaluate.svm(Z_train, y_train, Z_translate_test, y_translate_test)
 acc_knn = evaluate.knn(Z_train, y_train, Z_translate_test, y_translate_test, k=5)
-acc_svd = evaluate.nearsub(Z_train, y_train, Z_translate_test, y_translate_test, n_comp=20)
+acc_svd = evaluate.nearsub(Z_train, y_train, Z_translate_test, y_translate_test, n_comp=10)
 acc = {"svm": acc_svm, "knn": acc_knn, "nearsub-svd": acc_svd} 
 utils.save_params(model_dir, acc, name="acc_translate_test.json")
 

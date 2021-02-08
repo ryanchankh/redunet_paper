@@ -26,7 +26,7 @@ class Lift1D(Lift):
         assert len(kernels.shape) == 3, "kernel should have dimensions (out_channel, in_channel, kernel_size)"
         super(Lift1D, self).__init__(kernels, stride, relu)
     
-    def __call__(self, Z, y=None):
+    def __call__(self, Z, y=None, sgd=False):
         ksize = self.kernels.shape[2]
         _Z = F.pad(torch.tensor(Z).float(), (0, ksize-1), 'circular')
         _kernels = torch.tensor(self.kernels).float()
@@ -42,7 +42,7 @@ class Lift2D(Lift):
             "(out_channel, in_channel, kernel_height, kernel_width)"
         super(Lift2D, self).__init__(kernels, stride, relu)
     
-    def __call__(self, Z, y=None):
+    def __call__(self, Z, y=None, sgd=False):
         ksize = self.kernels.shape[2]
         _Z = F.pad(torch.tensor(Z).float(), (0, ksize-1, 0, ksize-1), 'circular')
         _kernels = torch.tensor(self.kernels).float()

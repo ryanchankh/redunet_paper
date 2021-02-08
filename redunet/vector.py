@@ -11,16 +11,21 @@ class Vector:
         self.eps = eps
         self.lmbda = lmbda
 
-    def __call__(self, Z, y=None):
+    def __call__(self, Z, y=None, sgd=False):
         init = y is not None
-        if init:
-            self.compute_gam(y)
-            self.save_gam()
-        else:
-            self.load_gam()
-
+#        if init:
+#            self.compute_gam(y)
+#            self.save_gam()
+#        else:
+#            self.load_gam()
+#
         for layer in range(self.layers):
-            Z, y_approx = self.forward(layer, Z, y, init)
+            if sgd and layer == self.layers-1: #NOTE: last layer
+                Z, y_approx = self.forward(layer, Z, y, True)
+            elif sgd and layer != self.layers-1: #NOTE: not last layer
+                Z, y_approx = self.forward(layer, Z, y, False)
+            else:
+                Z, y_approx = self.forward(layer, Z, y, init)
             if self.arch.save_loss:
                 self.arch.update_loss(layer, *self.compute_loss(Z, y_approx))
             if init and layer in self.arch.save_layers:
@@ -31,8 +36,11 @@ class Vector:
         if init:
             self.init(Z, y)
             self.save_weights(layer)
+            self.save_gam(layer)
         else:
             self.load_weights(layer)
+            self.load_gam(layer)
+
         expd = Z @ self.E.T
         comp = np.stack([Z @ C.T for C in self.Cs])
         clus, y_approx = self.nonlinear(comp)
@@ -46,6 +54,7 @@ class Vector:
         self.num_classes = self.arch.num_classes
 
     def init(self, Z, y):
+        print('in init function')
         self.compute_gam(y)
         self.compute_E(Z)
         self.compute_Cs(Z, y)
@@ -131,15 +140,15 @@ class Vector:
         self.E = weights[0]
         self.Cs = weights[1:]
 
-    def save_gam(self):
+    def save_gam(self, layer):
         weight_dir = os.path.join(self.arch.model_dir, "weights")
         os.makedirs(weight_dir, exist_ok=True)
-        save_path = os.path.join(weight_dir, f"{self.block_id}_gam.npy")
+        save_path = os.path.join(weight_dir, f"{self.block_id}_{layer}_gam.npy")
         np.save(save_path, self.gam)
 
-    def load_gam(self):
+    def load_gam(self, layer):
         weight_dir = os.path.join(self.arch.model_dir, "weights")
-        save_path = os.path.join(weight_dir, f"{self.block_id}_gam.npy")
+        save_path = os.path.join(weight_dir, f"{self.block_id}_{layer}_gam.npy")
         self.gam = np.load(save_path)
 
     def save_layer(self, layer, Z):

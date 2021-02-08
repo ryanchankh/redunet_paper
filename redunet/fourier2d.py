@@ -12,8 +12,10 @@ class Fourier2D(Vector):
         if init:
             self.init(V, y)
             self.save_weights(layer)
+            self.save_gam(layer)
         else:
             self.load_weights(layer)
+            self.load_gam(layer)
         expd = np.einsum("bi...,ih...->bh...", V, self.E.conj(), optimize=True)
         comp = np.stack([np.einsum("bi...,ih...->bh...", V, C_j.conj(), optimize=True) \
                 for C_j in self.Cs])

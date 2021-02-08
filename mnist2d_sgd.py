@@ -30,7 +30,7 @@ parser.add_argument('--save_dir', type=str, default='./saved_models/',
                     help='base directory for saving PyTorch model. (default: ./saved_models/)')
 args = parser.parse_args()
 
-model_dir = os.path.join(args.save_dir, f"mnist2d-classes{''.join(map(str, args.classes))}",
+model_dir = os.path.join(args.save_dir, f"mnist2dsgd-classes{''.join(map(str, args.classes))}",
                          "samples{}_layers{}_outchannels{}_ksize{}_eps{}_eta{}{}"
                          "".format(args.samples, args.layers, args.outchannels, args.ksize, args.eps, args.eta, args.tail))
 os.makedirs(model_dir, exist_ok=True)
@@ -53,26 +53,33 @@ utils.save_features(model_dir, "X_train", X_train, y_train)
 utils.save_features(model_dir, "X_test", X_test, y_test)
 utils.save_features(model_dir, "X_translate_train", X_translate_train, y_translate_train)
 utils.save_features(model_dir, "X_translate_test", X_translate_test, y_translate_test)
+print(X_train.shape, y_train.shape)
 
 # setup architecture
 kernels = np.random.normal(0, 1, size=(args.outchannels, 1, args.ksize, args.ksize))
 np.save(os.path.join(model_dir, 'features', 'kernel.npy'), kernels)
 
 for l in range(1, args.layers+1):
-    layers = [Lift2D(kernels)] + [Fourier2D(args.layers, eta=args.eta, eps=args.eps)]
-    model = Architecture(layers, model_dir, len(args.classes))
+    layers = [Lift2D(kernels)] + [Fourier2D(l, eta=args.eta, eps=args.eps)]
+    model = Architecture(layers, model_dir, len(args.classes), sgd=True)
 
-    batch_X_train = X_train[(l-1)*args.samples:l*args.samples]
-    batch_y_train = y_train[(l-1)*args.samples:l*args.samples]
+    batch_X_train = X_train[(l-1)*args.samples*len(args.classes):l*args.samples*len(args.classes)]
+    batch_y_train = y_train[(l-1)*args.samples*len(args.classes):l*args.samples*len(args.classes)]
+    print(batch_X_train.shape, batch_y_train.shape)
 
     # train/test pass
     print("Forward pass - train features")
     batch_Z_train = model(batch_X_train, batch_y_train).real
     utils.save_loss(model.loss_dict, model_dir, "train")
 
+    utils.save_features(model_dir, f"X_train_bs{l}", batch_X_train, batch_y_train)
+    utils.save_features(model_dir, f"Z_train_bs{l}", batch_Z_train, batch_y_train)
+
 Z_train = batch_Z_train  #NOTE: use last layer as final training 
 y_train = batch_y_train
 
+layers = [Lift2D(kernels)] + [Fourier2D(l, eta=args.eta, eps=args.eps)]
+model = Architecture(layers, model_dir, len(args.classes))
 print("Forward pass - test features")
 Z_test = model(X_test).real
 utils.save_loss(model.loss_dict, model_dir, "test")

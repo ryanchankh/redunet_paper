@@ -4,13 +4,14 @@ from scipy.special import softmax
 
 
 class Architecture:
-    def __init__(self, blocks, model_dir, num_classes, batch_size=1000, save_loss=True, save_layers=[]):
+    def __init__(self, blocks, model_dir, num_classes, batch_size=1000, save_loss=True, save_layers=[], sgd=False):
         self.blocks = blocks
         self.model_dir = model_dir
         self.num_classes = num_classes
         self.batch_size = batch_size
         self.save_loss = save_loss
         self.save_layers = save_layers
+        self.sgd = sgd
         
     def __call__(self, Z, y=None):
         for b, block in enumerate(self.blocks):
@@ -18,7 +19,7 @@ class Architecture:
             self.init_loss()
 
             Z = block.preprocess(Z)
-            Z = block(Z, y)
+            Z = block(Z, y, self.sgd)
             Z = block.postprocess(Z)
         return Z
 

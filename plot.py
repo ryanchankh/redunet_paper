@@ -30,8 +30,12 @@ def plot_heatmap(features, labels, title, model_dir):
     cbar = fig.colorbar(im, cax=cax, drawedges=0, ticks=[0, 0.5, 1])
     cbar.ax.tick_params(labelsize=18)
     # fig.colorbar(im, pad=0.02, drawedges=0, ticks=[0, 0.5, 1])
-    ax.set_xticks(np.linspace(0, num_samples, len(classes)+1))
-    ax.set_yticks(np.linspace(0, num_samples, len(classes)+1))
+    # ax.set_xticks([0, 400, 800, 1200, 1600, 2000])
+    # ax.set_yticks([0, 400, 800, 1200, 1600, 2000])
+    ax.set_xticks([0, 400, 800, 1200, 1600])
+    ax.set_yticks([0, 400, 800, 1200, 1600])
+    # ax.set_xticks(np.linspace(0, num_samples, len(classes)+1))
+    # ax.set_yticks(np.linspace(0, num_samples, len(classes)+1))
     [tick.label.set_fontsize(24) for tick in ax.xaxis.get_major_ticks()] 
     [tick.label.set_fontsize(24) for tick in ax.yaxis.get_major_ticks()]
     fig.tight_layout()
@@ -66,7 +70,7 @@ def plot_combined_loss(model_dir):
             num_iter = np.arange(loss.size)
             ax.plot(num_iter, loss, label=r'{} ({})'.format(name, model), 
                 color=color, linewidth=1.5, alpha=alpha, linestyle=linestyle,
-                marker=marker, markersize=markersize, markevery=100, markeredgecolor='black')
+                marker=marker, markersize=markersize, markevery=5, markeredgecolor='black')
     ax.set_ylabel('Loss', fontsize=40)
     ax.set_xlabel('Layers', fontsize=40)
     # ax.set_ylim((-0.05, 2.8)) # gaussian2d
@@ -314,7 +318,7 @@ def plot_sample_angle_combined(train_features, train_labels, test_features, test
     [tick.label.set_fontsize(22) for tick in ax.yaxis.get_major_ticks()]
     # ax.legend(loc='upper center', prop={"size": 13}, ncol=1, framealpha=0.5)
     fig.tight_layout()
-    fig.savefig(os.path.join(save_dir, f'sample_angle_combined-{title1}-vs-{title2}{tail}.pdf'), dpi=200)
+    fig.savefig(os.path.join(save_dir, f'sample_angle_combined-{title1}-vs-{title2}{tail}.pdf'))
     plt.close()
 
 
@@ -416,6 +420,31 @@ if __name__ == "__main__":
             plot_3d(Z_test, y_test, "Z_test", args.model_dir)
             plot_3d_transformations(args.model_dir)
 
+    if True:
+        batches = 16
+        X_translate_train_all = np.vstack([np.load(os.path.join(args.model_dir, "features", f"X_translate_train_all_b{i}.npy")) for i in range(batches)])
+        y_translate_train_all = np.hstack([np.load(os.path.join(args.model_dir, "features", f"y_translate_train_all_b{i}.npy")) for i in range(batches)])
+        Z_translate_train_all = np.vstack([np.load(os.path.join(args.model_dir, "features", f"Z_translate_train_all_b{i}.npy")) for i in range(batches)])
+        X_translate_test_all = np.vstack([np.load(os.path.join(args.model_dir, "features", f"X_translate_test_all_b{i}.npy")) for i in range(batches)])
+        y_translate_test_all = np.hstack([np.load(os.path.join(args.model_dir, "features", f"y_translate_test_all_b{i}.npy")) for i in range(batches)])
+        Z_translate_test_all = np.vstack([np.load(os.path.join(args.model_dir, "features", f"Z_translate_test_all_b{i}.npy")) for i in range(batches)])
+
+        X_translate_train_all = F.normalize(X_translate_train_all.reshape(X_translate_train_all.shape[0], -1))
+        Z_translate_train_all = F.normalize(Z_translate_train_all.reshape(Z_translate_train_all.shape[0], -1))
+        X_translate_test_all = F.normalize(X_translate_test_all.reshape(X_translate_test_all.shape[0], -1))
+        Z_translate_test_all = F.normalize(Z_translate_test_all.reshape(Z_translate_test_all.shape[0], -1))
+        print(X_translate_train_all.shape, y_translate_train_all.shape, Z_translate_train_all.shape)
+        print(X_translate_test_all.shape, y_translate_test_all.shape, Z_translate_test_all.shape)
+
+        plot_heatmap(X_translate_train_all, y_translate_train_all, "X_translate_train_all", args.model_dir)
+        plot_heatmap(Z_translate_train_all, y_translate_train_all, "Z_translate_train_all", args.model_dir)
+        plot_heatmap(X_translate_test_all, y_translate_test_all, "X_translate_test_all", args.model_dir)
+        plot_heatmap(Z_translate_test_all, y_translate_test_all, "Z_translate_test_all", args.model_dir)
+        plot_sample_angle_combined(Z_translate_train_all, y_translate_train_all, Z_translate_test_all, y_translate_test_all, args.model_dir, "Z-translate_train_all", "translate_test_all", args.tail)
+
+
+
+
     if multichannel: # multichannel data
         X_translate_train = np.load(os.path.join(args.model_dir, "features", "X_translate_train_features.npy"))
         y_translate_train = np.load(os.path.join(args.model_dir, "features", "X_translate_train_labels.npy"))
@@ -423,6 +452,15 @@ if __name__ == "__main__":
         X_translate_test = np.load(os.path.join(args.model_dir, "features", "X_translate_test_features.npy"))
         y_translate_test = np.load(os.path.join(args.model_dir, "features", "X_translate_test_labels.npy"))
         Z_translate_test = np.load(os.path.join(args.model_dir, "features", "Z_translate_test_features.npy"))
+
+
+
+        # X_translate_test_all = np.load(os.path.join(args.model_dir, "features", "X_translate_test_all.npy"))
+        # y_translate_test_all = np.load(os.path.join(args.model_dir, "features", "y_translate_test_all.npy"))
+        # Z_translate_test_all = np.load(os.path.join(args.model_dir, "features", "Z_translate_test_all.npy"))  
+        # X_test_all = np.load(os.path.join(args.model_dir, "features", "X_test_all.npy"))
+        # y_test_all = np.load(os.path.join(args.model_dir, "features", "y_test_all.npy"))
+        # Z_test_all = np.load(os.path.join(args.model_dir, "features", "Z_test_all.npy"))        
         # X_translate = np.vstack([np.load(os.path.join(args.model_dir, "features", f"X_translate_features-{i}-{i+50}.npy")) for i in range(0, 1000, 50)])
         # y_translate = np.hstack([np.load(os.path.join(args.model_dir, "features", f"y_translate_labels-{i}-{i+50}.npy")) for i in range(0, 1000, 50)])
         # Z_translate = np.vstack([np.load(os.path.join(args.model_dir, "features", f"Z_translate_features-{i}-{i+50}.npy")) for i in range(0, 1000, 50)])
@@ -433,12 +471,17 @@ if __name__ == "__main__":
         Z_translate_train = F.normalize(Z_translate_train.reshape(Z_translate_train.shape[0], -1))
         X_translate_test = F.normalize(X_translate_test.reshape(X_translate_test.shape[0], -1))
         Z_translate_test = F.normalize(Z_translate_test.reshape(Z_translate_test.shape[0], -1))
+        # X_translate_test_all = F.normalize(X_translate_test_all.reshape(X_translate_test_all.shape[0], -1))
+        # Z_translate_test_all = F.normalize(Z_translate_test_all.reshape(Z_translate_test_all.shape[0], -1))
+        # X_test_all = F.normalize(X_test_all.reshape(X_test_all.shape[0], -1))
+        # Z_test_all = F.normalize(Z_test_all.reshape(Z_test_all.shape[0], -1))
 
         if args.heatmap:
             plot_heatmap(X_translate_train, y_translate_train, "X_translate_train", args.model_dir)
             plot_heatmap(Z_translate_train, y_translate_train, "Z_translate_train", args.model_dir)
             plot_heatmap(X_translate_test, y_translate_test, "X_translate_test", args.model_dir)
             plot_heatmap(Z_translate_test, y_translate_test, "Z_translate_test", args.model_dir)
+
         if args.subspace_angle:
             plot_nearsub_angle(X_train, y_train, X_test, y_test, 
                                args.n_comp, args.model_dir, "X-test", args.tail)
@@ -462,9 +505,11 @@ if __name__ == "__main__":
 
 
         if args.sample_angle_combined:
-            plot_sample_angle_combined(X_train, y_train, X_test, y_test, args.model_dir, "X-train", "test", args.tail)
-            plot_sample_angle_combined(X_train, y_train, X_translate_train, y_translate_train, args.model_dir, "X-train", "translate_train", args.tail)
-            plot_sample_angle_combined(X_train, y_train, X_translate_train, y_translate_train, args.model_dir, "X-train", "translate_train", args.tail)
-            plot_sample_angle_combined(Z_train, y_train, Z_test, y_test, args.model_dir, "Z-train", "test", args.tail)
-            plot_sample_angle_combined(Z_train, y_train, Z_translate_test, y_translate_test, args.model_dir, "Z-train", "translate_test", args.tail)
-            plot_sample_angle_combined(Z_train, y_train, Z_translate_test, y_translate_test, args.model_dir, "Z-train", "translate_test", args.tail)
+            # plot_sample_angle_combined(X_train, y_train, X_test, y_test, args.model_dir, "X-train", "test", args.tail)
+            # plot_sample_angle_combined(X_train, y_train, X_translate_train, y_translate_train, args.model_dir, "X-", "translate_train", args.tail)
+            # plot_sample_angle_combined(X_train, y_train, X_translate_train, y_translate_train, args.model_dir, "X-train", "translate_train", args.tail)
+            # plot_sample_angle_combined(Z_train, y_train, Z_test, y_test, args.model_dir, "Z-train", "test", args.tail)
+            # plot_sample_angle_combined(Z_train, y_train, Z_translate_train, y_translate_train, args.model_dir, "Z-train", "translate_train", args.tail)
+            plot_sample_angle_combined(Z_translate_train, y_translate_train, Z_translate_test, y_translate_test, args.model_dir, "Z-translate_train", "translate_test", args.tail)
+            # plot_sample_angle_combined(Z_translate_train, y_translate_train, Z_translate_test_all, y_translate_test_all, args.model_dir, "Z-translate_train", "translate_test_all", args.tail)
+            # plot_sample_angle_combined(Z_train, y_train, Z_translate_train, y_translate_train, args.model_dir, "Z-train", "translate_train", args.tail)

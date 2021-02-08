@@ -133,7 +133,7 @@ if __name__ == "__main__":
     parser.add_argument('--model_dir', type=str, help='model directory')
     parser.add_argument('--test_translate', action='store_true', help='test translated features')
     parser.add_argument('--k', type=int, default=5, help='number of k for k-Nearest Neighbor')
-    parser.add_argument('--n_comp', type=int, default=50, help='number of components')
+    parser.add_argument('--n_comp', type=int, default=10, help='number of components')
     args = parser.parse_args()
 
     params = utils.load_params(args.model_dir)
@@ -145,45 +145,88 @@ if __name__ == "__main__":
     y_test = np.load(os.path.join(args.model_dir, "features", "Z_test_labels.npy"))
     Z_test = np.load(os.path.join(args.model_dir, "features", "Z_test_features.npy"))
 
-#    classes = params['classes']
-    multichannel = len(X_train.shape) > 2
-    X_train = F.normalize(X_train.reshape(X_train.shape[0], -1))
-    X_test = F.normalize(X_test.reshape(X_test.shape[0], -1))
+   # classes = params['classes']
+    # multichannel = len(X_train.shape) > 2
+#     X_train = F.normalize(X_train.reshape(X_train.shape[0], -1))
+#     X_test = F.normalize(X_test.reshape(X_test.shape[0], -1))
     Z_train = F.normalize(Z_train.reshape(Z_train.shape[0], -1))
     Z_test = F.normalize(Z_test.reshape(Z_test.shape[0], -1))
 
-    print("Train vs Test - Evaluation")
-    _, acc_svm = svm(Z_train, y_train, Z_test, y_test)
-    acc_knn = knn(Z_train, y_train, Z_test, y_test, k=args.k)
-    acc_svd = nearsub(Z_train, y_train, Z_test, y_test, n_comp=args.n_comp)
-    acc = {"svm": acc_svm, "knn": acc_knn, "nearsub-svd": acc_svd} 
-    utils.save_params(args.model_dir, acc, name="acc_test.json")
+    # print("Train vs Test - Evaluation")
+    # _, acc_svm = svm(Z_train, y_train, Z_test, y_test)
+    # acc_knn = knn(Z_train, y_train, Z_test, y_test, k=args.k)
+    # acc_svd = nearsub(Z_train, y_train, Z_test, y_test, n_comp=args.n_comp)
+    # acc = {"svm": acc_svm, "knn": acc_knn, "nearsub-svd": acc_svd} 
+    # utils.save_params(args.model_dir, acc, name="acc_test.json")
 
-    print("Train vs Test - Baseline")
-    baseline(X_train, y_train, X_test, y_test)
+#     print("Train vs Test - Baseline")
+#     baseline(X_train, y_train, X_test, y_test)
+
+    if True:
+        batches = 16
+        # X_translate_train_all = np.vstack([np.load(os.path.join(args.model_dir, "features", f"X_translate_train_all_b{i}.npy")) for i in range(batches)])
+        y_translate_train_all = np.hstack([np.load(os.path.join(args.model_dir, "features", f"y_translate_train_all_b{i}.npy")) for i in range(batches)])
+        Z_translate_train_all = np.vstack([np.load(os.path.join(args.model_dir, "features", f"Z_translate_train_all_b{i}.npy")) for i in range(batches)])
+        # X_translate_test_all = np.vstack([np.load(os.path.join(args.model_dir, "features", f"X_translate_test_all_b{i}.npy")) for i in range(batches)])
+        y_translate_test_all = np.hstack([np.load(os.path.join(args.model_dir, "features", f"y_translate_test_all_b{i}.npy")) for i in range(batches)])
+        Z_translate_test_all = np.vstack([np.load(os.path.join(args.model_dir, "features", f"Z_translate_test_all_b{i}.npy")) for i in range(batches)])
+
+        # X_translate_train_all = F.normalize(X_translate_train_all.reshape(X_translate_train_all.shape[0], -1))
+        Z_translate_train_all = F.normalize(Z_translate_train_all.reshape(Z_translate_train_all.shape[0], -1))
+        # X_translate_test_all = F.normalize(X_translate_test_all.reshape(X_translate_test_all.shape[0], -1))
+        Z_translate_test_all = F.normalize(Z_translate_test_all.reshape(Z_translate_test_all.shape[0], -1))
+
+        print("Translate Train All- Evaluation")
+        _, acc_svm = svm(Z_train, y_train, Z_translate_train_all, y_translate_train_all)
+        acc_knn = knn(Z_train, y_train, Z_translate_train_all, y_translate_train_all, k=args.k)
+        acc_svd = nearsub(Z_train, y_train, Z_translate_train_all, y_translate_train_all, n_comp=args.n_comp)
+        acc = {"svm": acc_svm, "knn": acc_knn, "nearsub-svd": acc_svd} 
+        utils.save_params(args.model_dir, acc, name="acc_translate_train_all.json")
+
+        print("Translate Test All - Evaluation")
+        _, acc_svm = svm(Z_train, y_train, Z_translate_test_all, y_translate_test_all)
+        acc_knn = knn(Z_train, y_train, Z_translate_test_all, y_translate_test_all, k=args.k)
+        acc_svd = nearsub(Z_train, y_train, Z_translate_test, y_translate_test, n_comp=args.n_comp)
+        acc = {"svm": acc_svm, "knn": acc_knn, "nearsub-svd": acc_svd} 
+        utils.save_params(args.model_dir, acc, name="acc_translate_test_all.json")
+
+
 
     if args.test_translate: # multichannel data
         bs = 100
         n_samples = 1000
-#        X_translate = np.load(os.path.join(args.model_dir, "features", "X_translate_features.npy"))
-#        y_translate = np.load(os.path.join(args.model_dir, "features", "X_translate_labels.npy"))
-#        Z_translate = np.load(os.path.join(args.model_dir, "features", "Z_translate_features.npy"))
-        Z_translate = np.vstack([np.load(os.path.join(args.model_dir, 'features', f'Z_translate_features-{i}-{i+bs}.npy')) for i in range(0, n_samples, bs)])
+        X_translate_train = np.load(os.path.join(args.model_dir, "features", "X_translate_train_features.npy"))
+        y_translate_train = np.load(os.path.join(args.model_dir, "features", "X_translate_train_labels.npy"))
+        Z_translate_train = np.load(os.path.join(args.model_dir, "features", "Z_translate_train_features.npy"))
+        X_translate_test = np.load(os.path.join(args.model_dir, "features", "X_translate_test_features.npy"))
+        y_translate_test = np.load(os.path.join(args.model_dir, "features", "X_translate_test_labels.npy"))
+        Z_translate_test = np.load(os.path.join(args.model_dir, "features", "Z_translate_test_features.npy"))
+        # Z_translate = np.vstack([np.load(os.path.join(args.model_dir, 'features', f'Z_translate_features-{i}-{i+bs}.npy')) for i in range(0, n_samples, bs)])
 
-        y_translate = np.hstack([np.load(os.path.join(args.model_dir, 'features', f'y_translate_labels-{i}-{i+bs}.npy')) for i in range(0, n_samples, bs)])
+        # y_translate = np.hstack([np.load(os.path.join(args.model_dir, 'features', f'y_translate_labels-{i}-{i+bs}.npy')) for i in range(0, n_samples, bs)])
 #        X_translate = F.normalize(X_translate.reshape(X_translate.shape[0], -1))
-        print(Z_translate.shape, y_translate.shape)
-        Z_translate = F.normalize(Z_translate.reshape(Z_translate.shape[0], -1))
+        # print(Z_translate.shape, y_translate.shape)
+        Z_translate_train = F.normalize(Z_translate_train.reshape(Z_translate_train.shape[0], -1))
+        Z_translate_train = F.normalize(Z_translate_train.reshape(Z_translate_train.shape[0], -1))
+        Z_translate_test = F.normalize(Z_translate_test.reshape(Z_translate_test.shape[0], -1))
+        Z_translate_test = F.normalize(Z_translate_test.reshape(Z_translate_test.shape[0], -1))
 
-        print("Train vs Translate - Evaluation")
-        _, acc_svm = svm(Z_train, y_train, Z_translate, y_translate)
-        acc_knn = knn(Z_train, y_train, Z_translate, y_translate, k=args.k)
-        acc_svd = nearsub(Z_train, y_train, Z_translate, y_translate, n_comp=args.n_comp)
+        print("Train vs Translate Train - Evaluation")
+        _, acc_svm = svm(Z_train, y_train, Z_translate_train, y_translate_train)
+        acc_knn = knn(Z_train, y_train, Z_translate_train, y_translate_train, k=args.k)
+        acc_svd = nearsub(Z_train, y_train, Z_translate_train, y_translate_train, n_comp=args.n_comp)
         acc = {"svm": acc_svm, "knn": acc_knn, "nearsub-svd": acc_svd} 
-        utils.save_params(args.model_dir, acc, name="acc_translate.json")
+        utils.save_params(args.model_dir, acc, name="acc_translate_train.json")
 
-        print("Train vs Translate - Baseline")
-        baseline(X_train, y_train, X_translate, y_translate)
+        print("Train vs Translate Test - Evaluation")
+        _, acc_svm = svm(Z_train, y_train, Z_translate_test, y_translate_test)
+        acc_knn = knn(Z_train, y_train, Z_translate_test, y_translate_test, k=args.k)
+        acc_svd = nearsub(Z_train, y_train, Z_translate_test, y_translate_test, n_comp=args.n_comp)
+        acc = {"svm": acc_svm, "knn": acc_knn, "nearsub-svd": acc_svd} 
+        utils.save_params(args.model_dir, acc, name="acc_translate_test.json")
+
+        # print("Train vs Translate - Baseline")
+        # baseline(X_train, y_train, X_translate, y_translate)
 
 
 

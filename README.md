@@ -15,14 +15,9 @@ ReduNet is a deep neural network construcuted naturally by deriving the gradient
 ## Requirements
 This codebase is written for `python3`. To install necessary python packages, run `conda create --name redunet_official --file requirements.txt`.
 
-## Training/Testing
+## File Structure
 ### Training 
-To train a model, one can run the training files, which has the dataset as thier names. For instance, to run a mixture of two Gaussians, one can run the command. 
-
-```
-$ python3 gaussian2d.py --data 1 --noise 0.1 --samples 500 --layers 500 --eps 0.1 --eta 0.1
-```
-All the files for training is listed below: 
+To train a model, one can run the training files, which has the dataset as thier names. For the appropriate commands to reproduce our experimental results, check out the experiment section below. All the files for training is listed below: 
 
 - `gaussian2d.py`: mixture of Guassians in 2-dimensional Reals
 - `gaussian3d.py`: mixture of Guassians in 3-dimensional Reals
@@ -32,10 +27,10 @@ All the files for training is listed below:
 - `mnist2d.py`: MNIST dataset, each image is single-channel and model is trained to have translational invariance
 - `sinusoid.py`: mixture of sinusoidal waves, single and multichannel data
 
-## Evaluation and Ploting
+### Evaluation and Ploting
 Evaluation and plots are performed within each file. Functions are located in `evaluate.py` and `plot.py`.
 
-## Reproducing Experimental Results
+## Experiments
 Run the following commands to train, test, evaluate and plot figures for different settings:
 
 ### Main Paper

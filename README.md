@@ -13,7 +13,7 @@ ReduNet is a deep neural network construcuted naturally by deriving the gradient
 [1] Yu, Yaodong, Kwan Ho Ryan Chan, Chong You, Chaobing Song, and Yi Ma. "[Learning diverse and discriminative representations via the principle of maximal coding rate reduction](https://proceedings.neurips.cc/paper/2020/file/6ad4174eba19ecb5fed17411a34ff5e6-Paper.pdf)" Advances in Neural Information Processing Systems 33 (2020). 
 
 ## Requirements
-This codebase is written for `python3`. To install necessary python packages, run `pip install -r requirements.txt`.
+This codebase is written for `python3`. To install necessary python packages, run `conda create --name redunet_official --file requirements.txt`.
 
 ## Training/Testing
 ### Training 

@@ -61,7 +61,7 @@ class Vector:
         for j in range(self.num_classes):
             idx = (y == int(j))
             Z_j = Z[:, idx]
-            m_j = Z_j.shape[0]
+            m_j = Z_j.shape[1]
             c_j = d / (m_j * self.eps)
             C = c_j * np.linalg.inv(I + c_j * Z_j @ Z_j.T)
             Cs[j] = C
